@@ -26,7 +26,7 @@ public:
     void restore();
     void save();
 
-public Q_SLOTS:
+public slots:
     void setMinAmplitude(const unsigned int amplitude);
     void setIntegrationTime0(const unsigned int integrationTime);
     void setIntegrationTime1(const unsigned int integrationTime);
@@ -36,7 +36,7 @@ public Q_SLOTS:
     void setOffset(const int offset);
     void setUserData(const QByteArray userData);
 
-public Q_SIGNALS:
+signals:
     void offsetChanged();
     void minAmplitudeChanged();
     void integrationTimeChanged();

@@ -1,4 +1,4 @@
-#include "../include/espros_qt/data_header.h"
+#include "espros_qt/data_header.h"
 
 
 DataHeader::DataHeader(const char *data, const int length)

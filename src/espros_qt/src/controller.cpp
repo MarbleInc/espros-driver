@@ -1,4 +1,4 @@
-#include "../include/espros_qt/controller.h"
+#include "espros_qt/controller.h"
 
 
 Controller::Controller(Settings &settings, Interface &interface):settings(settings), interface(interface)

@@ -1,7 +1,7 @@
-#include "../include/espros_qt/interface.h"
-#include "../include/espros_qt/tcp_cmd_connection.h"
-#include "../include/espros_qt/udp_data_connection.h"
-#include "../include/espros_qt/data_header.h"
+#include "espros_qt/interface.h"
+#include "espros_qt/tcp_cmd_connection.h"
+#include "espros_qt/udp_data_connection.h"
+#include "espros_qt/data_header.h"
 #include <QByteArray>
 #include <QDebug>
 #include <QtCore>

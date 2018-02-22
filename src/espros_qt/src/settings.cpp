@@ -1,4 +1,4 @@
-#include "../include/espros_qt/settings.h"
+#include "espros_qt/settings.h"
 #include "QStandardPaths"
 
 Settings::Settings()
