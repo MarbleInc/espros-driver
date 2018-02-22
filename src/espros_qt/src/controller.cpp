@@ -123,23 +123,23 @@ void Controller::receivedData(const char *pData, const int length, const bool co
 
   DataHeader dataHeader(pData, length);
 
-  Q_EMIT receivedMeasurementData(pData, dataHeader);
+  emit receivedMeasurementData(pData, dataHeader);
 }
 
 //Forward connected event
 void Controller::cmdConnectionConnected()
 {
-  Q_EMIT connected();
+  emit connected();
 }
 
 //Forward disconnected event
 void Controller::cmdConnectionDisconnected()
 {
-  Q_EMIT disconnected();
+  emit disconnected();
 }
 
 //Forward updateFps event
 void Controller::onFpsUpdate(const unsigned int fps)
 {
-  Q_EMIT updateFps(fps);
+  emit updateFps(fps);
 }
