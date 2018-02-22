@@ -1,4 +1,4 @@
-#include "../include/espros_qt/tcp_cmd_connection.h"
+#include "espros_qt/tcp_cmd_connection.h"
 #include <QtCore>
 #include <QTimer>
 

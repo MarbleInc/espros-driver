@@ -1,4 +1,4 @@
-#include "../include/espros_qt/udp_data_connection.h"
+#include "espros_qt/udp_data_connection.h"
 
 #define PACKET_HEADER_SIZE          20
 

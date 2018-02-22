@@ -15,7 +15,7 @@
 #include <string>
 #include <std_msgs/String.h>
 #include <sstream>
-#include "../include/espros_qt/qnode.hpp"
+#include "espros_qt/qnode.hpp"
 
 /*****************************************************************************
 ** Namespaces

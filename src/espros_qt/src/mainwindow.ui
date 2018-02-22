@@ -536,13 +536,13 @@
   <customwidget>
    <class>WidgetData</class>
    <extends>QWidget</extends>
-   <header>widget_data.h</header>
+   <header>espros_qt/widget_data.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>WidgetHeader</class>
    <extends>QWidget</extends>
-   <header>widget_header.h</header>
+   <header>espros_qt/widget_header.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

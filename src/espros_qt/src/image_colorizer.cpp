@@ -1,4 +1,4 @@
-#include "../include/espros_qt/image_colorizer.h"
+#include "espros_qt/image_colorizer.h"
 #include <QColor>
 #include <QDebug>
 #include <QRgb>

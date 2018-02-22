@@ -1,4 +1,4 @@
-#include "../include/espros_qt/widget_header.h"
+#include "espros_qt/widget_header.h"
 #include "ui_widget_header.h"
 
 WidgetHeader::WidgetHeader(QWidget *parent) :

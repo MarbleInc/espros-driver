@@ -1,23 +1,23 @@
-int argc, char** argv, ,
-#include "../include/espros_qt/mainwindow.h"
+#include "espros_qt/mainwindow.h"
 #include "ui_mainwindow.h"
-#include "../include/espros_qt/image_colorizer.h"
+#include "espros_qt/image_colorizer.h"
 #include <QImage>
 #include <QApplication>
 #include <QMessageBox>
-#include "../include/espros_qt/udp_data_connection.h"
-#include "../include/espros_qt/tcp_cmd_connection.h"
+#include "espros_qt/udp_data_connection.h"
+#include "espros_qt/tcp_cmd_connection.h"
 #include <QTimer>
-#include "data_header.h"
+#include "espros_qt/data_header.h"
 #include "math.h"
 
-
-MainWindow::MainWindow(int argc, char** argv, Controller &controller, Settings &settings, QWidget *parent) :
+//int argc, char** argv,
+//    qnode(argc, argv)
+MainWindow::MainWindow(Controller &controller, Settings &settings, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     controller(controller),
-    settings(settings),
-    qnode(argc, argv)
+    settings(settings)
+
 {
   ui->setupUi(this);
 

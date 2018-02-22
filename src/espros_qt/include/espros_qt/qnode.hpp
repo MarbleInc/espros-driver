@@ -1,5 +1,5 @@
 /**
- * @file /include/espros_qt/qnode.hpp
+ * @file /includeespros_qt/qnode.hpp
  *
  * @brief Communications central!
  *
@@ -55,7 +55,7 @@ public:
 	QStringListModel* loggingModel() { return &logging_model; }
 	void log( const LogLevel &level, const std::string &msg);
 
-Q_SIGNALS:
+signals:
 	void loggingUpdated();
     void rosShutdown();
 

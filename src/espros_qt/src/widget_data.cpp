@@ -1,8 +1,8 @@
-#include "../include/espros_qt/widget_data.h"
+#include "espros_qt/widget_data.h"
 #include "ui_widget_data.h"
-#include "../include/espros_qt/image_colorizer.h"
+#include "espros_qt/image_colorizer.h"
 #include "math.h"
-
+#include <QImage>
 
 const double maxAmplitudeValue = 2600.0;
 const unsigned int maxValidValue = 15000;
@@ -83,7 +83,7 @@ void WidgetData::showDistance(const char *pData, DataHeader &dataHeader)
       unsigned int pixelDistance = (distanceMsb << 8) + distanceLsb;
 
       //Colorize the pixel
-      imageDistance.setPixelColor(x, y, imageColorizerDistance.getColor(pixelDistance, ImageColorizer::REDTOBLUE));
+      imageDistance.setPixel(x, y, imageColorizerDistance.getColor(pixelDistance, ImageColorizer::REDTOBLUE).rgb());
       index++;
     }
   }
@@ -127,9 +127,9 @@ void WidgetData::showDistanceAmplitude(const char *pData, DataHeader &dataHeader
       }
 
       //Colorize the pixel
-      imageDistance.setPixelColor(x, y, imageColorizerDistance.getColor(pixelDistance, ImageColorizer::REDTOBLUE));
+      imageDistance.setPixel(x, y, imageColorizerDistance.getColor(pixelDistance, ImageColorizer::REDTOBLUE).rgb());
 
-      imageAmplitude.setPixelColor(x, y, imageColorizerAmplitude.getColor(pixelAmplitude, colorSpace));
+      imageAmplitude.setPixel(x, y, imageColorizerAmplitude.getColor(pixelAmplitude, colorSpace).rgb());
       index++;
     }
   }
@@ -157,7 +157,7 @@ void WidgetData::showGrayscale(const char *pData, DataHeader &dataHeader)
       unsigned int pixelGrayscale = (distanceMsb << 8) + distanceLsb;
 
       //Colorize the pixel
-      imageGrayscale.setPixelColor(x, y, imageColorizerDistance.getColor(pixelGrayscale, ImageColorizer::GRAYSCALE));
+      imageGrayscale.setPixel(x, y, imageColorizerDistance.getColor(pixelGrayscale, ImageColorizer::GRAYSCALE).rgb());
       index++;
     }
   }

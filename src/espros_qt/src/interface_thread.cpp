@@ -1,4 +1,4 @@
-#include "../include/espros_qt/interface_thread.h"
+#include "espros_qt/interface_thread.h"
 
 InterfaceThread::InterfaceThread()
 {

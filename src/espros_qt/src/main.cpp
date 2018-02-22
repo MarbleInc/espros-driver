@@ -8,14 +8,15 @@
 /*****************************************************************************
 ** Includes
 *****************************************************************************/
-#include "../include/espros_qt/mainwindow.h"
-#include "../include/espros_qt/controller.h"
-#include "../include/espros_qt/settings.h"
-#include "../include/espros_qt/interface.h"
+#include "espros_qt/mainwindow.h"
+#include "espros_qt/controller.h"
+#include "espros_qt/settings.h"
+#include "espros_qt/interface.h"
+#include "espros_qt/qnode.hpp"
 
 #include <QtGui>
 #include <QApplication>
-//#include "../include/espros_qt/main_window.hpp"
+//#include "espros_qt/main_window.hpp"
 
 /*****************************************************************************
 ** Main
@@ -32,7 +33,7 @@ int main(int argc, char **argv) {
     Settings settings;
     Controller controller(settings, interface);
 
-    espros_qt::MainWindow w(controller, settings, argc,argv);
+    MainWindow w(controller, settings);
     w.show();
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
     int result = app.exec();
