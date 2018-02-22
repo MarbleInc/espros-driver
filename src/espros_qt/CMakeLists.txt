@@ -5,13 +5,23 @@
 cmake_minimum_required(VERSION 2.8.0)
 project(espros_qt)
 
+add_compile_options(-std=c++11)
+
 ##############################################################################
 # Catkin
 ##############################################################################
 
 # qt_build provides the qt cmake glue, roscpp the comms for a default talker
-find_package(catkin REQUIRED COMPONENTS qt_build roscpp)
+
+# find_package(Qt5 REQUIRED COMPONENTS QtCore QtGui)
+# include(${QT_USE_FILE})
+
+find_package(Qt5 COMPONENTS Widgets REQUIRED)
+# find_package(Qt5Widgets)
+find_package(catkin REQUIRED COMPONENTS qt_build roscpp std_msgs sensor_msgs)
+
 include_directories(${catkin_INCLUDE_DIRS})
+
 # Use this to define what the package will export (e.g. libs, headers).
 # Since the default here is to produce only a binary, we don't worry about
 # exporting anything.
@@ -23,7 +33,10 @@ catkin_package()
 
 # this comes from qt_build's qt-ros.cmake which is automatically
 # included via the dependency call in package.xml
-rosbuild_prepare_qt4(QtCore QtGui) # Add the appropriate components to the component list here
+# rosbuild_prepare_qt4(QtCore QtGui) # Add the appropriate components to the component list here
+
+add_definitions(${Qt5Widgets_DEFINITIONS})
+set(CMAKE_CXX_FLAGS "${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 ##############################################################################
 # Sections
@@ -32,10 +45,15 @@ rosbuild_prepare_qt4(QtCore QtGui) # Add the appropriate components to the compo
 file(GLOB QT_FORMS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} ui/*.ui)
 file(GLOB QT_RESOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} resources/*.qrc)
 file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/espros_qt/*.hpp)
+file(GLOB_RECURSE QT_MOC RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINKS include/espros_qt/*.h)
 
-QT4_ADD_RESOURCES(QT_RESOURCES_CPP ${QT_RESOURCES})
-QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
-QT4_WRAP_CPP(QT_MOC_HPP ${QT_MOC})
+# QT4_ADD_RESOURCES(QT_RESOURCES_CPP ${QT_RESOURCES})
+# QT4_WRAP_UI(QT_FORMS_HPP ${QT_FORMS})
+# QT4_WRAP_CPP(QT_MOC_HPP ${QT_MOC})
+
+qt5_add_resources(QT_RESOURCES_CPP ${QT_RESOURCES})
+qt5_wrap_ui(QT_FORMS_HPP ${QT_FORMS})
+qt5_wrap_cpp(QT_MOC_HPP ${QT_MOC})
 
 ##############################################################################
 # Sources
