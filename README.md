@@ -8,13 +8,13 @@ sudo apt-get install ros-kinetic-qt-build
 
 sudo apt-get install ros-kinetic-qt-ros
 
-sudo apt-get install ros-kinetic-qt-qui
+sudo apt-get install ros-kinetic-qt-gui
 
-sudo apt-get install ros-kinetic-qt-qui-app
+sudo apt-get install ros-kinetic-qt-gui-app
 
-sudo apt-get install ros-kinetic-qt-qui-core
+sudo apt-get install ros-kinetic-qt-gui-core
 
-sudo apt-get install ros-kinetic-qt-qui-cpp
+sudo apt-get install ros-kinetic-qt-gui-cpp
 
 If you get a build error like:
 
