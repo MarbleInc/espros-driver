@@ -85,7 +85,7 @@ void QNode::run() {
 		++count;
 	}
 	std::cout << "Ros shutdown, proceeding to close the gui." << std::endl;
-	Q_EMIT rosShutdown(); // used to signal the gui for a shutdown (useful to roslaunch)
+	emit rosShutdown(); // used to signal the gui for a shutdown (useful to roslaunch)
 }
 
 
@@ -121,7 +121,7 @@ void QNode::log( const LogLevel &level, const std::string &msg) {
 	}
 	QVariant new_row(QString(logging_model_msg.str().c_str()));
 	logging_model.setData(logging_model.index(logging_model.rowCount()-1),new_row);
-	Q_EMIT loggingUpdated(); // used to readjust the scrollbar
+	emit loggingUpdated(); // used to readjust the scrollbar
 }
 
 }  // namespace espros_qt

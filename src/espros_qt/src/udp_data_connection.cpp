@@ -114,7 +114,7 @@ void UdpDataConnection::processPendingDatagrams()
       {
         complete = true;
       }
-      Q_EMIT receivedData(rxBuffer, receivedBytes, complete);
+      emit receivedData(rxBuffer, receivedBytes, complete);
     }
   }
 }

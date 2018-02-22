@@ -11,7 +11,7 @@ Settings::Settings()
 void Settings::setRange(const unsigned int range)
 {
   this->range = range;
-  //no signal to Q_EMIT
+  //no signal to emit
 }
 unsigned int Settings::getRange() const
 {
@@ -21,7 +21,7 @@ unsigned int Settings::getRange() const
 void Settings::setIntegrationTime0(const unsigned int integrationTime)
 {
   this->integrationTime0 = integrationTime;
-  Q_EMIT integrationTimeChanged();
+  emit integrationTimeChanged();
 }
 unsigned int Settings::getIntegrationTime0() const
 {
@@ -31,7 +31,7 @@ unsigned int Settings::getIntegrationTime0() const
 void Settings::setIntegrationTime1(const unsigned int integrationTime)
 {
   this->integrationTime1 = integrationTime;
-  Q_EMIT integrationTimeChanged();
+  emit integrationTimeChanged();
 }
 unsigned int Settings::getIntegrationTime1() const
 {
@@ -41,7 +41,7 @@ unsigned int Settings::getIntegrationTime1() const
 void Settings::setIntegrationTime2(const unsigned int integrationTime)
 {
   this->integrationTime2 = integrationTime;
-  Q_EMIT integrationTimeChanged();
+  emit integrationTimeChanged();
 }
 unsigned int Settings::getIntegrationTime2() const
 {
@@ -51,7 +51,7 @@ unsigned int Settings::getIntegrationTime2() const
 void Settings::setIntegrationTimeGrayscale(const unsigned int integrationTime)
 {
   this->integrationTimeGrayscale = integrationTime;
-  Q_EMIT integrationTimeChanged();
+  emit integrationTimeChanged();
 }
 unsigned int Settings::getIntegrationTimeGrayscale() const
 {
@@ -61,7 +61,7 @@ unsigned int Settings::getIntegrationTimeGrayscale() const
 void Settings::setOffset(const int offset)
 {
   this->offset = offset;
-  Q_EMIT offsetChanged();
+  emit offsetChanged();
 }
 int Settings::getOffset() const
 {
@@ -71,7 +71,7 @@ int Settings::getOffset() const
 void Settings::setMinAmplitude(const unsigned int amplitude)
 {
   this->minAmplitude = amplitude;
-  Q_EMIT minAmplitudeChanged();
+  emit minAmplitudeChanged();
 }
 unsigned int Settings::getMinAmplitude() const
 {
@@ -81,7 +81,7 @@ unsigned int Settings::getMinAmplitude() const
 void Settings::setUserData(const QByteArray userData)
 {
   this->userData = userData;
-  //no signal to Q_EMIT
+  //no signal to emit
 }
 QByteArray Settings::getUserData() const
 {

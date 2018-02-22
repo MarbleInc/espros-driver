@@ -269,13 +269,13 @@ void Interface::receivedAnswer(QByteArray data)
   switch(answer)
   {
     case TOFCAM_ANSWER_ACK:
-      Q_EMIT receivedAck();
+      emit receivedAck();
       waitAck = false;
       break;
     case TOFCAM_ANSWER_ERROR:
       {
         uint8_t errorNumber = data.at(1);
-        Q_EMIT receivedError(errorNumber);
+        emit receivedError(errorNumber);
         qDebug() << "Received Error: " << errorNumber;
       }
       break;
@@ -287,7 +287,7 @@ void Interface::receivedAnswer(QByteArray data)
 
 void Interface::onUpdateFps()
 {
-  Q_EMIT updateFps(numMeasurements);
+  emit updateFps(numMeasurements);
   numMeasurements = 0;
 }
 
@@ -297,15 +297,15 @@ void Interface::receivedData(const char *pData, const int length, bool complete)
   {
     numMeasurements++;
   }
-  Q_EMIT receivedMeasurementData(pData, length, complete);
+  emit receivedMeasurementData(pData, length, complete);
 }
 
 void Interface::cmdConnectionConnected()
 {
-  Q_EMIT connected();
+  emit connected();
 }
 
 void Interface::cmdConnectionDisconnected()
 {
-  Q_EMIT disconnected();
+  emit disconnected();
 }

@@ -31,7 +31,7 @@ void TcpCmdConnection::startRunning()
   connect(timeoutTimer, SIGNAL(timeout()), this, SLOT(timeout()));
   timeoutTimer->start(TIMER_INTERVAL);
 
-  Q_EMIT checkToSendData();
+  emit checkToSendData();
 }
 
 void TcpCmdConnection::stopRunning()
@@ -60,7 +60,7 @@ bool TcpCmdConnection::setConnectionParameters(QString ip, uint16_t port)
 void TcpCmdConnection::sendCommand(QByteArray dataToSend)
 {
   queue.enqueue(dataToSend);
-  Q_EMIT checkData();
+  emit checkData();
 }
 
 int TcpCmdConnection::output(QTcpSocket &socket, QByteArray dataToSend)
@@ -156,10 +156,10 @@ void TcpCmdConnection::readTcpData()
       if (isValidData(receiverData))
       {
         receiverData.remove(0, HEADER_SIZE);
-        Q_EMIT receivedAnswer(receiverData);
+        emit receivedAnswer(receiverData);
         state = STATE_CONNECTED;
         receiverData.clear();
-        Q_EMIT checkData();
+        emit checkData();
       }
       break;
     default:
@@ -174,7 +174,7 @@ void TcpCmdConnection::TcpConnected()
   if (state == STATE_CONNECTING)
   {
     qDebug() << "connected";
-    Q_EMIT connected();
+    emit connected();
     state = STATE_CONNECTED;
   }
   else
@@ -187,9 +187,9 @@ void TcpCmdConnection::TcpConnected()
 void TcpCmdConnection::TcpDisconnected()
 {
   qDebug() << "disconnected";
-  Q_EMIT disconnected();
+  emit disconnected();
   state = STATE_UNCONNECTED;
-  Q_EMIT checkData();
+  emit checkData();
 }
 
 void TcpCmdConnection::error(QAbstractSocket::SocketError error __attribute__((unused)))
@@ -201,7 +201,7 @@ void TcpCmdConnection::error(QAbstractSocket::SocketError error __attribute__((u
   tcpSocket->abort();
   state = STATE_UNCONNECTED;
 
-  Q_EMIT checkData();
+  emit checkData();
 }
 
 void TcpCmdConnection::timeout()
@@ -209,7 +209,7 @@ void TcpCmdConnection::timeout()
   switch(state)
   {
     case STATE_UNCONNECTED:
-      Q_EMIT checkToSendData();
+      emit checkToSendData();
       break;
     case STATE_WAIT_ACK:
       //No ACK received, close the connection
@@ -224,7 +224,7 @@ void TcpCmdConnection::timeout()
       }
       else
       {
-        Q_EMIT checkToSendData();
+        emit checkToSendData();
       }
       break;
     case STATE_CLOSING:
