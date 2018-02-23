@@ -15,7 +15,7 @@ MainWindow::MainWindow(int argc, char** argv, Controller &controller, Settings &
     ui(new Ui::MainWindow),
     controller(controller),
     settings(settings),
-    qnode(argc, argv)
+    qnode(argc, argv, controller)
 {
   ui->setupUi(this);
 
