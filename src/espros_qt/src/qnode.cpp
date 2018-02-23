@@ -15,6 +15,7 @@
 #include <string>
 #include <std_msgs/String.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/image_encodings.h>
 #include <sstream>
 #include "espros_qt/qnode.hpp"
 
@@ -114,16 +115,16 @@ void QNode::showDistance(const char *pData, DataHeader &dataHeader)
 	sensor_msgs::Image img;
 
 	img.header.stamp = ros::Time::now();
+	img.header.frame_id = "1";
+
+	img.encoding = sensor_msgs::image_encodings::MONO8;
+	img.is_bigendian = 1; //true
+	img.step = img.width;
 
 	img.width = dataHeader.width;
 	img.height = dataHeader.height;
 
-	img.is_bigendian = 1; //true
-	img.step = img.width * 3;
-
 	img.data.resize(img.step * img.height);
-
-  imageColorizerDistance.setRange(0, settings->getRange());
 
   int index = 0;
   for (int y = 0; y < dataHeader.height; y++)
@@ -134,20 +135,10 @@ void QNode::showDistance(const char *pData, DataHeader &dataHeader)
       uint8_t distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
       uint8_t distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
 
-      //Combint to a value
+			//Combint to a value
       unsigned int pixelDistance = (distanceMsb << 8) + distanceLsb;
 
-      //Colorize the pixel
-			QColor color = imageColorizerDistance.getColor(pixelDistance, ImageColorizer::REDTOBLUE);
-
-			//Extract bytes
-			int red = color.red();
-			int green = color.green();
-			int blue = color.blue();
-
-			img.data[index] = red;
-			img.data[index + 1] = green;
-			img.data[index + 2] = blue;
+			img.data[index] = pixelDistance;
 
 			index++;
     }
