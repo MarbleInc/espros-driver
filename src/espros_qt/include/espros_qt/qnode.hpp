@@ -32,27 +32,12 @@ public:
 	bool init();
 	bool init(const std::string &master_url, const std::string &host_url);
 	void run();
-
-	/*********************
-	** Logging
-	**********************/
-	enum LogLevel {
-	         Debug,
-	         Info,
-	         Warn,
-	         Error,
-	         Fatal
-	 };
-
-	QStringListModel* loggingModel() { return &logging_model; }
-	void log( const LogLevel &level, const std::string &msg);
-
+  
   private slots:
     void tcpConnected();
     void tcpDisconnected();
 
 signals:
-	void loggingUpdated();
     void rosShutdown();
 
 private:
