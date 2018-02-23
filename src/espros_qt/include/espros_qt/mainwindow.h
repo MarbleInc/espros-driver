@@ -32,7 +32,7 @@ public:
   explicit MainWindow(int argc, char** argv, Controller &controller, Settings &settings, QWidget *parent = 0);
   ~MainWindow();
 
-private Q_SLOTS:
+private slots:
   void receivedMeasurementData(const char *pData, DataHeader &dataHeader);
   void updateFps(const unsigned int fps);
 

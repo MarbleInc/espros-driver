@@ -29,11 +29,11 @@ class TcpCmdConnection: public CmdConnection
     void sendCommand(QByteArray dataToSend);
     void close();
 
-  public Q_SLOTS:
+  public slots:
     void startRunning();
     void stopRunning();
 
-  private Q_SLOTS:
+  private slots:
     void readTcpData();
     void TcpConnected();
     void TcpDisconnected();
@@ -41,7 +41,7 @@ class TcpCmdConnection: public CmdConnection
     void checkToSendData();
     void error(QAbstractSocket::SocketError error);
 
-  Q_SIGNALS:
+  signals:
     void checkData();
 
   private:

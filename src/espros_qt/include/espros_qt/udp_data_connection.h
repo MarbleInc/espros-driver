@@ -16,11 +16,11 @@ class UdpDataConnection: public DataConnection
     ~UdpDataConnection();
     void setPort(const uint16_t port);
 
-  public Q_SLOTS:
+  public slots:
     void startRunning();
     void stopRunning();
 
-  private Q_SLOTS:
+  private slots:
     void processPendingDatagrams();
 
   private:

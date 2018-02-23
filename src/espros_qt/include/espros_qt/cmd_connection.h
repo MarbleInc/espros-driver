@@ -15,11 +15,11 @@ class CmdConnection: public QObject
     virtual void sendCommand(QByteArray dataToSend) = 0;
     virtual void close() = 0;
 
-  public Q_SLOTS:
+  public slots:
     virtual void startRunning() = 0;
     virtual void stopRunning() = 0;
 
-    Q_SIGNALS:
+    signals:
     void receivedAnswer(QByteArray data);
     void connected();
     void disconnected();
