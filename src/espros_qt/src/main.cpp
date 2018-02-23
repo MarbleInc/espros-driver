@@ -12,11 +12,9 @@
 #include "espros_qt/controller.h"
 #include "espros_qt/settings.h"
 #include "espros_qt/interface.h"
-#include "espros_qt/qnode.hpp"
 
 #include <QtGui>
 #include <QApplication>
-//#include "espros_qt/main_window.hpp"
 
 /*****************************************************************************
 ** Main
@@ -33,7 +31,7 @@ int main(int argc, char **argv) {
     Settings settings;
     Controller controller(settings, interface);
 
-    MainWindow w(controller, settings);
+    MainWindow w(argc, argv, controller, settings);
     w.show();
     app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
     int result = app.exec();

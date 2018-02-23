@@ -10,14 +10,12 @@
 #include "espros_qt/data_header.h"
 #include "math.h"
 
-//int argc, char** argv,
-//    qnode(argc, argv)
-MainWindow::MainWindow(Controller &controller, Settings &settings, QWidget *parent) :
+MainWindow::MainWindow(int argc, char** argv, Controller &controller, Settings &settings, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     controller(controller),
-    settings(settings)
-
+    settings(settings),
+    qnode(argc, argv)
 {
   ui->setupUi(this);
 
@@ -58,6 +56,16 @@ MainWindow::MainWindow(Controller &controller, Settings &settings, QWidget *pare
   disconnected();
 
   ui->dockWidgetContents->setSettings(&settings);
+
+  //QNode
+
+  QObject::connect(&qnode, SIGNAL(rosShutdown()), this, SLOT(close()));
+
+  if (!qnode.init()) {
+    std::cout << "QNode init failed." << std::endl;
+    exit(0);
+  }
+
 }
 
 MainWindow::~MainWindow()

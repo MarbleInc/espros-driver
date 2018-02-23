@@ -5,12 +5,6 @@
  *
  * @date February 2011
  **/
-/*****************************************************************************
-** Ifdefs
-*****************************************************************************/
-
-#ifndef espros_qt_QNODE_HPP_
-#define espros_qt_QNODE_HPP_
 
 /*****************************************************************************
 ** Includes
@@ -20,13 +14,6 @@
 #include <string>
 #include <QThread>
 #include <QStringListModel>
-
-
-/*****************************************************************************
-** Namespaces
-*****************************************************************************/
-
-namespace espros_qt {
 
 /*****************************************************************************
 ** Class
@@ -65,7 +52,3 @@ private:
 	ros::Publisher chatter_publisher;
     QStringListModel logging_model;
 };
-
-}  // namespace espros_qt
-
-#endif /* espros_qt_QNODE_HPP_ */

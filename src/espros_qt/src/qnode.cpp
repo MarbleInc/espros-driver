@@ -18,12 +18,6 @@
 #include "espros_qt/qnode.hpp"
 
 /*****************************************************************************
-** Namespaces
-*****************************************************************************/
-
-namespace espros_qt {
-
-/*****************************************************************************
 ** Implementation
 *****************************************************************************/
 
@@ -31,6 +25,7 @@ QNode::QNode(int argc, char** argv ) :
 	init_argc(argc),
 	init_argv(argv)
 	{}
+
 
 QNode::~QNode() {
     if(ros::isStarted()) {
@@ -70,10 +65,9 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 }
 
 void QNode::run() {
-	ros::Rate loop_rate(1);
+	ros::Rate loop_rate(10);
 	int count = 0;
 	while ( ros::ok() ) {
-
 		std_msgs::String msg;
 		std::stringstream ss;
 		ss << "hello world " << count;
@@ -123,5 +117,3 @@ void QNode::log( const LogLevel &level, const std::string &msg) {
 	logging_model.setData(logging_model.index(logging_model.rowCount()-1),new_row);
 	emit loggingUpdated(); // used to readjust the scrollbar
 }
-
-}  // namespace espros_qt
