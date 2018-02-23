@@ -1,3 +1,6 @@
+#ifndef QNODE_H
+#define QNODE_H
+
 /**
  * @file /includeespros_qt/qnode.hpp
  *
@@ -52,3 +55,5 @@ private:
 	ros::Publisher chatter_publisher;
     QStringListModel logging_model;
 };
+
+#endif
