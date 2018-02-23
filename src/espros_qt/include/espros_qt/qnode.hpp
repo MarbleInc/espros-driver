@@ -18,7 +18,8 @@
 #include <QThread>
 #include <QStringListModel>
 #include "controller.h"
-
+#include "image_colorizer.h"
+#include <QColor>
 
 /*****************************************************************************
 ** Class
@@ -32,10 +33,14 @@ public:
 	bool init();
 	bool init(const std::string &master_url, const std::string &host_url);
 	void run();
-  
+  void setSettings(const Settings *settings);
+
+
   private slots:
     void tcpConnected();
     void tcpDisconnected();
+    void showDistance(const char *pData, DataHeader &dataHeader);
+
 
 signals:
     void rosShutdown();
@@ -44,8 +49,12 @@ private:
 	int init_argc;
 	char** init_argv;
 	ros::Publisher chatter_publisher;
+  ros::Publisher distance_image_publisher;
   QStringListModel logging_model;
   Controller &controller;
+  Settings *settings;
+  ImageColorizer imageColorizerDistance;
+
 };
 
 #endif
