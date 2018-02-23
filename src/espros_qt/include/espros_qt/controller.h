@@ -22,13 +22,13 @@ public:
     void calibrateSystemOffset();
     void close();
 
-Q_SIGNALS:
+signals:
     void receivedMeasurementData(const char *pData, DataHeader &dataHeader);
     void updateFps(const unsigned int fps);
     void connected();
     void disconnected();
 
-private Q_SLOTS:
+private slots:
     void receivedData(const char *pData, const int length, const bool complete);
     void onFpsUpdate(const unsigned int fps);
     void cmdConnectionConnected();

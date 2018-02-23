@@ -11,11 +11,11 @@ class DataConnection: public QObject
     virtual ~DataConnection(){}
     virtual void setPort(const uint16_t port) = 0;
 
-  public Q_SLOTS:
+  public slots:
     virtual void startRunning() = 0;
     virtual void stopRunning() = 0;
 
-  Q_SIGNALS:
+  signals:
     void receivedData(const char *pData, const int length, const bool complete);
 
 };

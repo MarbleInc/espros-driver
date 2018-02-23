@@ -27,7 +27,7 @@ class Interface: public QObject
     void calibrateSystemOffset(const QByteArray &userData = nullptr);
     void close();
 
-  Q_SIGNALS:
+  signals:
     void receivedAck();
     void receivedError(const int errorCode);
     void receivedMeasurementData(const char *pData, const int length, bool complete);
@@ -36,7 +36,7 @@ class Interface: public QObject
     void stopRunning();
     void updateFps(const unsigned int fps);
 
-  private Q_SLOTS:
+  private slots:
     void receivedAnswer(QByteArray data);
     void receivedData(const char *pData, const int length, bool complete);
     void cmdConnectionConnected();
