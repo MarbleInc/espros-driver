@@ -9,6 +9,7 @@
 #include <QSettings>
 #include "settings.h"
 #include "controller.h"
+#include "qnode.hpp"
 
 namespace Ui {
 class MainWindow;
@@ -28,7 +29,7 @@ class MainWindow : public QMainWindow
   };
 
 public:
-  explicit MainWindow(Controller &controller, Settings &settings, QWidget *parent = 0);
+  explicit MainWindow(int argc, char** argv, Controller &controller, Settings &settings, QWidget *parent = 0);
   ~MainWindow();
 
 private Q_SLOTS:
@@ -60,6 +61,7 @@ private:
   Ui::MainWindow *ui;
   Controller &controller;
   Settings &settings;
+  QNode qnode;
 };
 
 #endif // MAINWINDOW_H
