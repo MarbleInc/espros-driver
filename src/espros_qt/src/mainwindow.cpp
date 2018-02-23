@@ -59,6 +59,8 @@ MainWindow::MainWindow(int argc, char** argv, Controller &controller, Settings &
 
   //QNode
 
+  qnode.setSettings(&settings);
+
   QObject::connect(&qnode, SIGNAL(rosShutdown()), this, SLOT(close()));
 
   if (!qnode.init()) {
