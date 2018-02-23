@@ -17,6 +17,8 @@
 #include <string>
 #include <QThread>
 #include <QStringListModel>
+#include "controller.h"
+
 
 /*****************************************************************************
 ** Class
@@ -25,7 +27,7 @@
 class QNode : public QThread {
     Q_OBJECT
 public:
-	QNode(int argc, char** argv );
+	QNode(int argc, char** argv, Controller &controller);
 	virtual ~QNode();
 	bool init();
 	bool init(const std::string &master_url, const std::string &host_url);
@@ -45,6 +47,10 @@ public:
 	QStringListModel* loggingModel() { return &logging_model; }
 	void log( const LogLevel &level, const std::string &msg);
 
+  private slots:
+    void tcpConnected();
+    void tcpDisconnected();
+
 signals:
 	void loggingUpdated();
     void rosShutdown();
@@ -53,7 +59,8 @@ private:
 	int init_argc;
 	char** init_argv;
 	ros::Publisher chatter_publisher;
-    QStringListModel logging_model;
+  QStringListModel logging_model;
+  Controller &controller;
 };
 
 #endif

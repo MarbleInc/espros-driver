@@ -21,11 +21,14 @@
 ** Implementation
 *****************************************************************************/
 
-QNode::QNode(int argc, char** argv ) :
+QNode::QNode(int argc, char** argv, Controller &controller) :
 	init_argc(argc),
-	init_argv(argv)
-	{}
-
+	init_argv(argv),
+	controller(controller)
+	{
+		connect(&controller, &Controller::connected, this, &QNode::tcpConnected);
+	  connect(&controller, &Controller::disconnected, this, &QNode::tcpDisconnected);
+	}
 
 QNode::~QNode() {
     if(ros::isStarted()) {
@@ -82,6 +85,21 @@ void QNode::run() {
 	emit rosShutdown(); // used to signal the gui for a shutdown (useful to roslaunch)
 }
 
+void QNode::tcpConnected() {
+	std_msgs::String msg;
+	msg.data = "QNode: tcp connected";
+	chatter_publisher.publish(msg);
+
+	std::cout << "QNode: tcp connected" << std::endl;
+}
+
+void QNode::tcpDisconnected() {
+	std_msgs::String msg;
+	msg.data = "QNode: tcp disconnected";
+	chatter_publisher.publish(msg);
+	
+	std::cout << "QNode: tcp disconnected" << std::endl;
+}
 
 void QNode::log( const LogLevel &level, const std::string &msg) {
 	logging_model.insertRows(logging_model.rowCount(),1);
