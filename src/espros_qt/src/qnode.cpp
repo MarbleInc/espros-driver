@@ -76,7 +76,6 @@ void QNode::run() {
 		ss << "hello world " << count;
 		msg.data = ss.str();
 		chatter_publisher.publish(msg);
-		log(Info,std::string("I sent: ")+msg.data);
 		ros::spinOnce();
 		loop_rate.sleep();
 		++count;
@@ -97,41 +96,6 @@ void QNode::tcpDisconnected() {
 	std_msgs::String msg;
 	msg.data = "QNode: tcp disconnected";
 	chatter_publisher.publish(msg);
-	
-	std::cout << "QNode: tcp disconnected" << std::endl;
-}
 
-void QNode::log( const LogLevel &level, const std::string &msg) {
-	logging_model.insertRows(logging_model.rowCount(),1);
-	std::stringstream logging_model_msg;
-	switch ( level ) {
-		case(Debug) : {
-				ROS_DEBUG_STREAM(msg);
-				logging_model_msg << "[DEBUG] [" << ros::Time::now() << "]: " << msg;
-				break;
-		}
-		case(Info) : {
-				ROS_INFO_STREAM(msg);
-				logging_model_msg << "[INFO] [" << ros::Time::now() << "]: " << msg;
-				break;
-		}
-		case(Warn) : {
-				ROS_WARN_STREAM(msg);
-				logging_model_msg << "[INFO] [" << ros::Time::now() << "]: " << msg;
-				break;
-		}
-		case(Error) : {
-				ROS_ERROR_STREAM(msg);
-				logging_model_msg << "[ERROR] [" << ros::Time::now() << "]: " << msg;
-				break;
-		}
-		case(Fatal) : {
-				ROS_FATAL_STREAM(msg);
-				logging_model_msg << "[FATAL] [" << ros::Time::now() << "]: " << msg;
-				break;
-		}
-	}
-	QVariant new_row(QString(logging_model_msg.str().c_str()));
-	logging_model.setData(logging_model.index(logging_model.rowCount()-1),new_row);
-	emit loggingUpdated(); // used to readjust the scrollbar
+	std::cout << "QNode: tcp disconnected" << std::endl;
 }
