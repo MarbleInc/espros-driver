@@ -119,10 +119,10 @@ void QNode::showDistance(const char *pData, DataHeader &dataHeader)
 
 	img.encoding = sensor_msgs::image_encodings::MONO8;
 	img.is_bigendian = 1; //true
-	img.step = img.width;
 
 	img.width = dataHeader.width;
 	img.height = dataHeader.height;
+	img.step = img.width;
 
 	img.data.resize(img.step * img.height);
 
