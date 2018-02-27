@@ -1,0 +1,28 @@
+<launch>
+  <node name="espros_nogui" pkg="espros_nogui" type="espros_nogui">
+    <!-- 0 = distance, 1 = amplitude -->
+    <param name="espros_data" value="0" />
+
+    <!-- 1 - 2,700 (us), 0 to disable, default = 500 -->
+    <param name="integration_time_0" value="500" />
+
+    <!-- 1 - 2,500 (us), 0 to disable -->
+    <param name="integration_time_1" value="0" />
+
+    <!-- 1 - ? (us), 0 to disable -->
+    <param name="integration_time_2" value="0" />
+
+    <!-- 1 - 50,000 (us), 0 to disable, default = 100 -->
+    <param name="integration_time_grayscale" value="100" />
+
+    <!-- 1 - 15,000 (mm), 0 to disable -->
+    <param name="offset" value="0" />
+
+    <!-- 1 - 6,000 (lsb), 0 to disable, default = 75 -->
+    <param name="min_amplitude" value="75" />
+
+    <!-- 1 - 15,000 (mm), 0 to disable, default = 4000 -->
+    <param name="range" value="4000" />
+
+  </node>
+</launch>

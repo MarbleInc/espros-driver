@@ -78,6 +78,37 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 void QNode::fetchParams() {
 	ros::NodeHandle nh("~");
 	nh.param("espros_data", esprosData, 0);
+
+	int intTime0, intTime1, intTime2, intTimeGray, offset, minAmp, range;
+
+	if (nh.getParam("integration_time_0", intTime0)) {
+		settings->setIntegrationTime0(intTime0);
+	}
+
+	if (nh.getParam("integration_time_1", intTime1)) {
+		settings->setIntegrationTime1(intTime1);
+	}
+
+	if (nh.getParam("integration_time_2", intTime2)) {
+		settings->setIntegrationTime2(intTime2);
+	}
+
+	if (nh.getParam("integration_time_grayscale", intTimeGray)) {
+		settings->setIntegrationTimeGrayscale(intTimeGray);
+	}
+
+	if (nh.getParam("offset", offset)) {
+		settings->setOffset(offset);
+	}
+
+	if (nh.getParam("min_amplitude", minAmp)) {
+		settings->setMinAmplitude(minAmp);
+	}
+
+	if (nh.getParam("range", range)) {
+		settings->setRange(range);
+	}
+
 }
 
 void QNode::setSettings(const Settings *settings)
