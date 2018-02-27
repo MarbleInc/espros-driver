@@ -45,11 +45,13 @@ bool QNode::init() {
 	if ( ! ros::master::check() ) {
 		return false;
 	}
+	fetchParams();
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
 	ros::NodeHandle n;
 	// Add your ros communications here.
 	chatter_publisher = n.advertise<std_msgs::String>("chatter", 1000);
 	distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance", 100);
+	amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude", 100);
 	start();
 	return true;
 }
@@ -62,13 +64,20 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 	if ( ! ros::master::check() ) {
 		return false;
 	}
+	fetchParams();
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
 	ros::NodeHandle n;
 	// Add your ros communications here.
 	chatter_publisher = n.advertise<std_msgs::String>("chatter", 1000);
 	distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance", 100);
+	amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude", 100);
 	start();
 	return true;
+}
+
+void QNode::fetchParams() {
+	ros::NodeHandle nh("~");
+	nh.param("espros_data", esprosData, 0);
 }
 
 void QNode::setSettings(const Settings *settings)
@@ -101,7 +110,14 @@ void QNode::tcpConnected() {
 	std::cout << "QNode: tcp connected" << std::endl;
 
   controller.sendAllSettingsToCamera();
-  controller.requestDistance(true); // stream
+
+	if (0 == esprosData) {
+		std::cout << "Requesting distance..." << std::endl;
+		controller.requestDistance(true); // stream
+	} else {
+		std::cout << "Requesting amplitude..." << std::endl;
+		controller.requestGrayscale(true); // stream
+	}
 }
 
 void QNode::tcpDisconnected() {
@@ -147,5 +163,10 @@ void QNode::showDistance(const char *pData, DataHeader &dataHeader)
     }
   }
 
-	distance_image_publisher.publish(img);
+	if (0 == esprosData) {
+		distance_image_publisher.publish(img);
+	} else {
+		amplitude_image_publisher.publish(img);
+	}
+
 }

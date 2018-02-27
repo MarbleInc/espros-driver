@@ -45,14 +45,17 @@ signals:
     void rosShutdown();
 
 private:
+  void fetchParams();
+
 	int init_argc;
 	char** init_argv;
 	ros::Publisher chatter_publisher;
   ros::Publisher distance_image_publisher;
+  ros::Publisher amplitude_image_publisher;
   QStringListModel logging_model;
   Controller &controller;
   Settings *settings;
-
+  int esprosData;
 };
 
 #endif

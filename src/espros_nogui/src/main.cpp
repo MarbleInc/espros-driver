@@ -26,6 +26,9 @@ int main(int argc, char **argv) {
     **********************/
     QCoreApplication app(argc, argv);
 
+    //Passing 3rd arg may fix x server dependency
+    //QCoreApplication app(argc, argv, false);
+
     Interface interface;
     Settings settings;
     Controller controller(settings, interface);
