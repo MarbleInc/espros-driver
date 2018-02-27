@@ -22,3 +22,5 @@ Usage - distance image: rosrun espros_nogui espros_nogui _espros_data:=0
 Usage - amplitude image: rosrun espros_nogui espros_nogui _espros_data:=1
 
 Defaults to distance; retains last param.
+
+Publishes to topics espros_distnace, espros_amplitude.  Image format MONO16.
