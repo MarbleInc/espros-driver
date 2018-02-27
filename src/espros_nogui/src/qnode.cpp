@@ -16,7 +16,6 @@
 #include <std_msgs/String.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
-#include <sstream>
 #include "espros_nogui/qnode.hpp"
 
 /*****************************************************************************
@@ -90,7 +89,7 @@ void QNode::run() {
 		loop_rate.sleep();
 		++count;
 	}
-	std::cout << "Ros shutdown, proceeding to close the gui." << std::endl;
+	std::cout << "Ros shutdown..." << std::endl;
 	emit rosShutdown(); // used to signal the gui for a shutdown (useful to roslaunch)
 }
 
@@ -100,6 +99,9 @@ void QNode::tcpConnected() {
 	chatter_publisher.publish(msg);
 
 	std::cout << "QNode: tcp connected" << std::endl;
+
+  controller.sendAllSettingsToCamera();
+  controller.requestDistance(true); // stream
 }
 
 void QNode::tcpDisconnected() {

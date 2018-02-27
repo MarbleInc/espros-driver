@@ -8,13 +8,12 @@
 /*****************************************************************************
 ** Includes
 *****************************************************************************/
-#include "espros_nogui/mainwindow.h"
 #include "espros_nogui/controller.h"
 #include "espros_nogui/settings.h"
 #include "espros_nogui/interface.h"
+#include "espros_nogui/qnode.hpp"
 
-#include <QtGui>
-#include <QApplication>
+#include <QCoreApplication>
 
 /*****************************************************************************
 ** Main
@@ -25,15 +24,22 @@ int main(int argc, char **argv) {
     /*********************
     ** Qt
     **********************/
-    QApplication app(argc, argv);
+    QCoreApplication app(argc, argv);
 
     Interface interface;
     Settings settings;
     Controller controller(settings, interface);
 
-    MainWindow w(argc, argv, controller, settings);
-    w.show();
-    app.connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
+    QNode qnode(argc, argv, controller);
+    qnode.setSettings(&settings);
+
+    if (!qnode.init()) {
+      std::cout << "QNode init failed." << std::endl;
+      exit(0);
+    }
+
+    QObject::connect(&qnode, SIGNAL(rosShutdown()), &app, SLOT(quit()));
+
     int result = app.exec();
 
 	return result;

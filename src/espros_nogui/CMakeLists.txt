@@ -20,28 +20,29 @@ find_package(catkin REQUIRED COMPONENTS
 # Find the Qt module libraries
 #################################################
 find_package(Qt5Core)
-find_package(Qt5Widgets)
-find_package(Qt5OpenGL)
+# find_package(Qt5Widgets)
+# find_package(Qt5OpenGL)
 find_package(Qt5Xml)
 find_package(Qt5Network REQUIRED)
 
 if(${Qt5Core_FOUND})
-  if(${Qt5Widgets_FOUND})
+  # if(${Qt5Widgets_FOUND})
     MESSAGE(STATUS "Found Qt ${Qt5Widgets_VERSION_STRING}")
     # FIX: Qt was built with -reduce-relocations
     if (Qt5_POSITION_INDEPENDENT_CODE)
       SET(CMAKE_POSITION_INDEPENDENT_CODE ON)
       add_definitions(-fPIC)
     endif()
-  endif(${Qt5Widgets_FOUND})
+  # endif(${Qt5Widgets_FOUND})
 
-  set(QT_INCLUDE_DIRS "${Qt5Core_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS} ${Qt5OpenGL_INCLUDE_DIRS} ${Qt5Xml_INCLUDE_DIRS}")
+#  set(QT_INCLUDE_DIRS "${Qt5Core_INCLUDE_DIRS} ${Qt5Widgets_INCLUDE_DIRS} ${Qt5OpenGL_INCLUDE_DIRS} ${Qt5Xml_INCLUDE_DIRS}")
+  set(QT_INCLUDE_DIRS "${Qt5Core_INCLUDE_DIRS} ${Qt5Xml_INCLUDE_DIRS}")
   get_target_property(QT_QTCORE_LIB Qt5::Core LOCATION)
   get_target_property(QT_QTXML_LIB Qt5::Xml LOCATION)
-  get_target_property(QT_QTWIDGET_LIB Qt5::Widgets LOCATION)
-  get_target_property(QT_QTGUI_LIB Qt5::Gui LOCATION)
-  set(QT_QTGUI_LIB ${QT_QTGUI_LIB} ${QT_QTWIDGET_LIB})
-  get_target_property(QT_QTOPENGL_LIB Qt5::OpenGL LOCATION)
+#  get_target_property(QT_QTWIDGET_LIB Qt5::Widgets LOCATION)
+#  get_target_property(QT_QTGUI_LIB Qt5::Gui LOCATION)
+#  set(QT_QTGUI_LIB ${QT_QTGUI_LIB} ${QT_QTWIDGET_LIB})
+#  get_target_property(QT_QTOPENGL_LIB Qt5::OpenGL LOCATION)
   get_target_property(QT_QTNETWORK_LIB Qt5::Network LOCATION)
 endif()
 
@@ -173,8 +174,10 @@ file(GLOB_RECURSE QT_SOURCES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} FOLLOW_SYMLINK
 # Binaries
 ##############################################################################
 
-add_executable(espros_nogui ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_FORMS_HPP} ${QT_MOC})
-target_link_libraries(espros_nogui ${QT_QTCORE_LIB} ${QT_QTGUI_LIB} ${QT_QTNETWORK_LIB} ${catkin_LIBRARIES})
+# add_executable(espros_nogui ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_FORMS_HPP} ${QT_MOC})
+add_executable(espros_nogui ${QT_SOURCES} ${QT_RESOURCES_CPP} ${QT_MOC})
+# target_link_libraries(espros_nogui ${QT_QTCORE_LIB} ${QT_QTGUI_LIB} ${QT_QTNETWORK_LIB} ${catkin_LIBRARIES})
+target_link_libraries(espros_nogui ${QT_QTCORE_LIB} ${QT_QTNETWORK_LIB} ${catkin_LIBRARIES})
 install(TARGETS espros_nogui RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
 ###########

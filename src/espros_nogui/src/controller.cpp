@@ -129,7 +129,9 @@ void Controller::receivedData(const char *pData, const int length, const bool co
 //Forward connected event
 void Controller::cmdConnectionConnected()
 {
+
   emit connected();
+
 }
 
 //Forward disconnected event

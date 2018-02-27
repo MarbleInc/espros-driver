@@ -18,8 +18,6 @@
 #include <QThread>
 #include <QStringListModel>
 #include "controller.h"
-#include "image_colorizer.h"
-#include <QColor>
 
 
 /*****************************************************************************
@@ -54,7 +52,6 @@ private:
   QStringListModel logging_model;
   Controller &controller;
   Settings *settings;
-  ImageColorizer imageColorizerDistance;
 
 };
 
