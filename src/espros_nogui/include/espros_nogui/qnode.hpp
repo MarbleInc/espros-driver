@@ -19,6 +19,8 @@
 #include <QStringListModel>
 #include "controller.h"
 
+#include <bitset>
+
 const std::string ESPROS32 = "ESPROS32";
 
 /*****************************************************************************
@@ -31,7 +33,6 @@ public:
 	QNode(int argc, char** argv, Controller &controller);
 	virtual ~QNode();
 	bool init();
-	bool init(const std::string &master_url, const std::string &host_url);
 	void run();
   void setSettings(const Settings *settings);
 
@@ -47,7 +48,8 @@ signals:
 
 private:
   void fetchParams();
-  void showEither(const char *pData, DataHeader &dataHeader);
+  void showDistance(const char *pData, DataHeader &dataHeader);
+  void showGrayscale(const char *pData, DataHeader &dataHeader);
   void showBoth(const char *pData, DataHeader &dataHeader);
 
 	int init_argc;
@@ -56,7 +58,6 @@ private:
   ros::Publisher distance_image_publisher;
   ros::Publisher amplitude_image_publisher;
   ros::Publisher amplitude_distance_image_publisher;
-  QStringListModel logging_model;
   Controller &controller;
   Settings *settings;
   int esprosData;

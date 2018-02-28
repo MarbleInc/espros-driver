@@ -21,29 +21,29 @@
 
 int main(int argc, char **argv) {
 
-    /*********************
-    ** Qt
-    **********************/
-    QCoreApplication app(argc, argv);
+  /*********************
+  ** Qt
+  **********************/
+  QCoreApplication app(argc, argv);
 
-    //Passing 3rd arg may fix x server dependency
-    //QCoreApplication app(argc, argv, false);
+  //Passing 3rd arg may fix x server dependency
+  //QCoreApplication app(argc, argv, false);
 
-    Interface interface;
-    Settings settings;
-    Controller controller(settings, interface);
+  Interface interface;
+  Settings settings;
+  Controller controller(settings, interface);
 
-    QNode qnode(argc, argv, controller);
-    qnode.setSettings(&settings);
+  QNode qnode(argc, argv, controller);
+  qnode.setSettings(&settings);
 
-    if (!qnode.init()) {
-      std::cout << "QNode init failed." << std::endl;
-      exit(0);
-    }
+  if (!qnode.init()) {
+    std::cout << "QNode init failed." << std::endl;
+    exit(0);
+  }
 
-    QObject::connect(&qnode, SIGNAL(rosShutdown()), &app, SLOT(quit()));
+  QObject::connect(&qnode, SIGNAL(rosShutdown()), &app, SLOT(quit()));
 
-    int result = app.exec();
+  int result = app.exec();
 
 	return result;
 }
