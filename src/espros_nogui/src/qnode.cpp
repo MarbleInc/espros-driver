@@ -29,7 +29,7 @@ QNode::QNode(int argc, char** argv, Controller &controller) :
 	{
 		connect(&controller, &Controller::connected, this, &QNode::tcpConnected);
 	  connect(&controller, &Controller::disconnected, this, &QNode::tcpDisconnected);
-		connect(&controller, &Controller::receivedMeasurementData, this, &QNode::showDistance);
+		connect(&controller, &Controller::receivedMeasurementData, this, &QNode::renderData);
 	}
 
 QNode::~QNode() {
@@ -52,6 +52,7 @@ bool QNode::init() {
 	chatter_publisher = n.advertise<std_msgs::String>("chatter", 1000);
 	distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance", 100);
 	amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude", 100);
+	amplitude_distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude_distance", 100);
 	start();
 	return true;
 }
@@ -71,6 +72,7 @@ bool QNode::init(const std::string &master_url, const std::string &host_url) {
 	chatter_publisher = n.advertise<std_msgs::String>("chatter", 1000);
 	distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance", 100);
 	amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude", 100);
+	amplitude_distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude_distance", 100);
 	start();
 	return true;
 }
@@ -145,9 +147,12 @@ void QNode::tcpConnected() {
 	if (0 == esprosData) {
 		std::cout << "Requesting distance..." << std::endl;
 		controller.requestDistance(true); // stream
-	} else {
+	} else if (1 == esprosData) {
 		std::cout << "Requesting amplitude..." << std::endl;
 		controller.requestGrayscale(true); // stream
+	} else {
+		std::cout << "Requesting distance and amplitude..." << std::endl;
+		controller.requestDistanceAmplitude(true); // stream
 	}
 }
 
@@ -159,7 +164,15 @@ void QNode::tcpDisconnected() {
 	std::cout << "QNode: tcp disconnected" << std::endl;
 }
 
-void QNode::showDistance(const char *pData, DataHeader &dataHeader)
+void QNode::renderData(const char *pData, DataHeader &dataHeader){
+	if (2 > esprosData) {
+		showEither(pData, dataHeader);
+	} else {
+		showBoth(pData, dataHeader);
+	}
+}
+
+void QNode::showEither(const char *pData, DataHeader &dataHeader)
 {
 	sensor_msgs::Image img;
 
@@ -184,9 +197,6 @@ void QNode::showDistance(const char *pData, DataHeader &dataHeader)
       uint8_t distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
       uint8_t distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
 
-			//Combint to a value
-      unsigned int pixelDistance = (distanceMsb << 8) + distanceLsb;
-
 			img.data[2*index] = distanceMsb;
 			img.data[2*index + 1] = distanceLsb;
 
@@ -200,4 +210,41 @@ void QNode::showDistance(const char *pData, DataHeader &dataHeader)
 		amplitude_image_publisher.publish(img);
 	}
 
+}
+
+void QNode::showBoth(const char *pData, DataHeader &dataHeader){
+	sensor_msgs::Image img;
+
+	img.header.stamp = ros::Time::now();
+	img.header.frame_id = "1";
+
+	img.encoding = ESPROS32;
+	img.is_bigendian = 1; //true
+
+	img.width = dataHeader.width;
+	img.height = dataHeader.height;
+	img.step = img.width * 4;
+
+	img.data.resize(img.step * img.height);
+
+  int index = 0;
+  for (int y = 0; y < dataHeader.height; y++)
+  {
+    for (int x = 0; x < dataHeader.width; x++)
+    {
+			uint8_t amplitudeMsb = (uint8_t) pData[4*index+3+dataHeader.offset];
+      uint8_t amplitudeLsb = (uint8_t) pData[4*index+2+dataHeader.offset];
+      uint8_t distanceMsb = (uint8_t) pData[4*index+1+dataHeader.offset];
+      uint8_t distanceLsb = (uint8_t) pData[4*index+0+dataHeader.offset];
+
+			img.data[4*index] = amplitudeMsb;
+			img.data[4*index + 1] = amplitudeLsb;
+			img.data[4*index + 2] = distanceMsb;
+			img.data[4*index + 3] = distanceLsb;
+
+			index++;
+    }
+  }
+
+	amplitude_distance_image_publisher.publish(img);
 }

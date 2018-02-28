@@ -1,6 +1,6 @@
 <launch>
   <node name="espros_nogui" pkg="espros_nogui" type="espros_nogui">
-    <!-- 0 = distance, 1 = amplitude -->
+    <!-- 0 = distance, 1 = amplitude, 2 = distance and amplitude -->
     <param name="espros_data" value="0" />
 
     <!-- 1 - 2,700 (us), 0 to disable, default = 500 -->

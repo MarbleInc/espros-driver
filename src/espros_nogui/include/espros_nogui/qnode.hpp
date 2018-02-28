@@ -19,6 +19,7 @@
 #include <QStringListModel>
 #include "controller.h"
 
+const std::string ESPROS32 = "ESPROS32";
 
 /*****************************************************************************
 ** Class
@@ -38,7 +39,7 @@ public:
   private slots:
     void tcpConnected();
     void tcpDisconnected();
-    void showDistance(const char *pData, DataHeader &dataHeader);
+    void renderData(const char *pData, DataHeader &dataHeader);
 
 
 signals:
@@ -46,12 +47,15 @@ signals:
 
 private:
   void fetchParams();
+  void showEither(const char *pData, DataHeader &dataHeader);
+  void showBoth(const char *pData, DataHeader &dataHeader);
 
 	int init_argc;
 	char** init_argv;
 	ros::Publisher chatter_publisher;
   ros::Publisher distance_image_publisher;
   ros::Publisher amplitude_image_publisher;
+  ros::Publisher amplitude_distance_image_publisher;
   QStringListModel logging_model;
   Controller &controller;
   Settings *settings;
