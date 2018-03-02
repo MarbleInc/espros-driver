@@ -201,7 +201,7 @@ void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 	img.header.stamp = now;
 	img.header.frame_id = FRAME_ID;
 
-	img.encoding = sensor_msgs::image_encodings::MONO16;
+	img.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
 	img.is_bigendian = 1; //true
 
 	img.width = dataHeader.width;
