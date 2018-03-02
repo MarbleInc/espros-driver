@@ -15,13 +15,24 @@
 
 #include <ros/ros.h>
 #include <string>
+#include <vector>
+#include <boost/array.hpp>
 #include <QThread>
 #include <QStringListModel>
 #include "controller.h"
+#include "image_colorizer.h"
 
 
 const std::string ESPROS32 = "ESPROS32";
-const std::string FRAME_ID = "1";
+const std::string FRAME_ID = "espros_base";
+
+const int HEIGHT = 240;
+const int WIDTH = 320;
+const std::string DISTORTION_MODEL = "plumb_bob";
+const std::vector<double> D = {0.0, 0.0, 0.0, 0.0, 0.0};
+const boost::array<double, 9> K  = {241.2, 0.0, 160.0, 0.0, 241.2, 120.0, 0.0, 0.0, 1.0};
+const boost::array<double, 9> R  = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+const boost::array<double, 12> P  = {241.2, 0.0, 160.0, 0.0, 0.0, 241.2, 120.0, 0.0, 0.0, 0.0, 1.0, 0.0};
 
 /*****************************************************************************
 ** Class
@@ -48,20 +59,35 @@ signals:
 
 private:
   void fetchParams();
-  void showDistance(const char *pData, DataHeader &dataHeader);
-  void showGrayscale(const char *pData, DataHeader &dataHeader);
-  void showBoth(const char *pData, DataHeader &dataHeader);
+  void renderDistance(const char *pData, DataHeader &dataHeader);
+  void renderDistanceColor(const char *pData, DataHeader &dataHeader);
+  void renderAmplitude(const char *pData, DataHeader &dataHeader);
+  void renderInterleave(const char *pData, DataHeader &dataHeader);
 
 	int init_argc;
 	char** init_argv;
-	ros::Publisher chatter_publisher;
-  ros::Publisher distance_image_publisher;
-  ros::Publisher amplitude_image_publisher;
-  ros::Publisher amplitude_distance_image_publisher;
-  ros::Publisher camera_info_publisher;
   Controller &controller;
   Settings *settings;
-  int esprosData;
+  ImageColorizer imageColorizerDistance;
+
+  ros::Publisher distance_image_publisher;
+  ros::Publisher distance_camera_info_publisher;
+
+  ros::Publisher distance_color_image_publisher;
+  ros::Publisher distance_color_camera_info_publisher;
+
+  ros::Publisher amplitude_image_publisher;
+  ros::Publisher amplitude_camera_info_publisher;
+
+  ros::Publisher interleave_image_publisher;
+  ros::Publisher interleave_camera_info_publisher;
+
+  int esprosData; // indicates single topic via console (rosrun)
+  int confidenceBits; // include confidence bits in output
+  int showDistance;
+  int showDistanceColor;
+  int showAmplitude;
+  int showInterleave;
 };
 
 #endif
