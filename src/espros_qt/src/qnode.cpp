@@ -112,17 +112,19 @@ void QNode::tcpDisconnected() {
 
 void QNode::showDistance(const char *pData, DataHeader &dataHeader)
 {
+	imageColorizerDistance.setRange(0, settings->getRange());
+
 	sensor_msgs::Image img;
 
 	img.header.stamp = ros::Time::now();
 	img.header.frame_id = "1";
 
-	img.encoding = sensor_msgs::image_encodings::MONO16;
+	img.encoding = sensor_msgs::image_encodings::RGB8;//MONO16;
 	img.is_bigendian = 1; //true
 
 	img.width = dataHeader.width;
 	img.height = dataHeader.height;
-	img.step = img.width * 2;
+	img.step = img.width * 3;// * 2;
 
 	img.data.resize(img.step * img.height);
 
@@ -137,9 +139,14 @@ void QNode::showDistance(const char *pData, DataHeader &dataHeader)
 
 			//Combint to a value
       unsigned int pixelDistance = (distanceMsb << 8) + distanceLsb;
+			QColor color = imageColorizerDistance.getColor(pixelDistance, ImageColorizer::REDTOBLUE);
+			uint rgb = color.rgb();
 
-			img.data[2*index] = distanceMsb;
-			img.data[2*index + 1] = distanceLsb;
+//			img.data[2*index] = distanceMsb;
+//			img.data[2*index + 1] = distanceLsb;
+			img.data[3*index] = rgb >> 16;
+			img.data[3*index + 1] = rgb >> 8;
+			img.data[3*index + 2] = rgb;
 
 			index++;
     }
