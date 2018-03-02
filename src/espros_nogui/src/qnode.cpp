@@ -50,17 +50,25 @@ bool QNode::init() {
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
 	ros::NodeHandle n;
 
-	distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance/image_raw", 100);
-	distance_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance/camera_info", 100);
+	if (showDistance) {
+		distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance/image_raw", 100);
+		distance_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance/camera_info", 100);
+	}
 
-	distance_color_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance_color/image_raw", 100);
-	distance_color_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance_color/camera_info", 100);
+	if (showDistanceColor) {
+		distance_color_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance_color/image_raw", 100);
+		distance_color_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance_color/camera_info", 100);
+	}
 
-	amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude/image_raw", 100);
-	amplitude_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_amplitude/camera_info", 100);
+	if (showAmplitude) {
+		amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude/image_raw", 100);
+		amplitude_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_amplitude/camera_info", 100);
+	}
 
-	interleave_image_publisher = n.advertise<sensor_msgs::Image>("espros_interleave/image_raw", 100);
-	interleave_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_interleave/camera_info", 100);
+	if (showInterleave) {
+		interleave_image_publisher = n.advertise<sensor_msgs::Image>("espros_interleave/image_raw", 100);
+		interleave_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_interleave/camera_info", 100);
+	}
 
 	start();
 	return true;
@@ -229,6 +237,13 @@ void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
 
 	cInfo.header.stamp = now;
 	cInfo.header.frame_id = FRAME_ID;
+	cInfo.height = HEIGHT;
+	cInfo.width = WIDTH;
+	cInfo.distortion_model = DISTORTION_MODEL;
+	cInfo.D = D;
+	cInfo.K = K;
+	cInfo.R = R;
+	cInfo.P = P;
 
 	img.header.stamp = now;
 	img.header.frame_id = FRAME_ID;
@@ -262,10 +277,23 @@ void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
 
 void QNode::renderAmplitude(const char *pData, DataHeader &dataHeader)
 {
+	sensor_msgs::CameraInfo cInfo;
 	sensor_msgs::Image img;
 
-	img.header.stamp = ros::Time::now();
-	img.header.frame_id = "1";
+	ros::Time now = ros::Time::now();
+
+	cInfo.header.stamp = now;
+	cInfo.header.frame_id = FRAME_ID;
+	cInfo.height = HEIGHT;
+	cInfo.width = WIDTH;
+	cInfo.distortion_model = DISTORTION_MODEL;
+	cInfo.D = D;
+	cInfo.K = K;
+	cInfo.R = R;
+	cInfo.P = P;
+
+	img.header.stamp = now;
+	img.header.frame_id = FRAME_ID;
 
 	img.encoding = sensor_msgs::image_encodings::MONO16;
 	img.is_bigendian = 1; //true
@@ -289,15 +317,28 @@ void QNode::renderAmplitude(const char *pData, DataHeader &dataHeader)
 		img.data[2*index + 1] = amplitudeLsb;
 	}
 
-	//amplituce_camera_info_publisher(cInfo);
+	amplitude_camera_info_publisher.publish(cInfo);
 	amplitude_image_publisher.publish(img);
 }
 
 void QNode::renderInterleave(const char *pData, DataHeader &dataHeader){
+	sensor_msgs::CameraInfo cInfo;
 	sensor_msgs::Image img;
 
-	img.header.stamp = ros::Time::now();
-	img.header.frame_id = "1";
+	ros::Time now = ros::Time::now();
+
+	cInfo.header.stamp = now;
+	cInfo.header.frame_id = FRAME_ID;
+	cInfo.height = HEIGHT;
+	cInfo.width = WIDTH;
+	cInfo.distortion_model = DISTORTION_MODEL;
+	cInfo.D = D;
+	cInfo.K = K;
+	cInfo.R = R;
+	cInfo.P = P;
+
+	img.header.stamp = now;
+	img.header.frame_id = FRAME_ID;
 
 	img.encoding = ESPROS32;
 	img.is_bigendian = 1; //true
@@ -325,6 +366,6 @@ void QNode::renderInterleave(const char *pData, DataHeader &dataHeader){
 		img.data[4*index + 3] = distanceLsb;
 	}
 
-	//interleave_camera_info_publisher(cInfo);
+	interleave_camera_info_publisher.publish(cInfo);
 	interleave_image_publisher.publish(img);
 }
