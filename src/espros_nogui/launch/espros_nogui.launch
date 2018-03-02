@@ -1,7 +1,23 @@
 <launch>
   <node name="espros_nogui" pkg="espros_nogui" type="espros_nogui">
-    <!-- 0 = distance, 1 = amplitude, 2 = distance and amplitude -->
-    <param name="espros_data" value="0" />
+
+    <!--  Used with rosrun in console.
+          Supports use of single output with out this .launch file.
+          If set, overrides the below params.
+
+          0 - distance
+          1 - distance color
+          2 - amplitude
+          3 - interleaved distance and amplitude
+          -1 - default, ignores this param, allowing use below params -->
+    <param name="espros_data" value="-1" />
+
+    <param name="show_distance" value="1" />
+    <param name="show_distance_color" value="0" /> <!-- Primarily for human visualization -->
+    <param name="show_amplitude" value="0" />
+    <param name="show_interleave" value="0" /> <!-- distance and amplitude -->
+    <param name="confidence_bits" value="1" /> <!-- does not apply to distance_color -->
+
 
     <!-- 1 - 2,700 (us), 0 to disable, default = 500 -->
     <param name="integration_time_0" value="500" />

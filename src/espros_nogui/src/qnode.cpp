@@ -49,12 +49,19 @@ bool QNode::init() {
 	fetchParams();
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
 	ros::NodeHandle n;
-	// Add your ros communications here.
-	chatter_publisher = n.advertise<std_msgs::String>("chatter", 1000);
-	distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance", 100);
-	amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude", 100);
-	amplitude_distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude_distance", 100);
-	camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_camera_info", 100);
+
+	distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance/image_raw", 100);
+	distance_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance/camera_info", 100);
+
+	distance_color_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance_color/image_raw", 100);
+	distance_color_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance_color/camera_info", 100);
+
+	amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude/image_raw", 100);
+	amplitude_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_amplitude/camera_info", 100);
+
+	interleave_image_publisher = n.advertise<sensor_msgs::Image>("espros_interleave/image_raw", 100);
+	interleave_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_interleave/camera_info", 100);
+
 	start();
 	return true;
 }
@@ -72,7 +79,14 @@ void QNode::run() {
 
 void QNode::fetchParams() {
 	ros::NodeHandle nh("~");
-	nh.param("espros_data", esprosData, 0);
+	nh.param("espros_data", esprosData, -1);
+
+	nh.param("show_distance", showDistance, 1);
+	nh.param("show_distance_color", showDistanceColor, 0);
+	nh.param("show_amplitude", showAmplitude, 0);
+	nh.param("show_interleave", showInterleave, 0);
+
+	nh.param("confidence_bits", confidenceBits, 1);
 
 	int intTime0, intTime1, intTime2, intTimeGray, offset, minAmp, range;
 
@@ -112,45 +126,54 @@ void QNode::setSettings(const Settings *settings)
 }
 
 void QNode::tcpConnected() {
-	std_msgs::String msg;
-	msg.data = "QNode: tcp connected";
-	chatter_publisher.publish(msg);
-
 	std::cout << "QNode: tcp connected" << std::endl;
 
   controller.sendAllSettingsToCamera();
 
-	if (0 == esprosData) {
-		std::cout << "Requesting distance..." << std::endl;
-		controller.requestDistance(true); // stream
-	} else if (1 == esprosData) {
+	//process console/.launch params
+	if (-1 != esprosData) {
+		showDistance = 0;
+		showDistanceColor = 0;
+		showAmplitude = 0;
+		showInterleave = 0;
+
+		switch(esprosData) {
+			case 0: showDistance = 1;
+				break;
+			case 1: showDistanceColor = 1;
+				break;
+			case 2: showAmplitude = 1;
+				break;
+			case 3: showInterleave = 1;
+				break;
+		}
+	}
+
+	if ( ((showDistance || showDistanceColor) && showAmplitude) || showInterleave ) {
+		std::cout << "Requesting interleaved distance and amplitude..." << std::endl;
+		controller.requestDistanceAmplitude(true); // stream
+	} else if (showAmplitude) {
 		std::cout << "Requesting amplitude..." << std::endl;
 		controller.requestGrayscale(true); // stream
 	} else {
-		std::cout << "Requesting distance and amplitude..." << std::endl;
-		controller.requestDistanceAmplitude(true); // stream
+		std::cout << "Requesting distance..." << std::endl;
+		controller.requestDistance(true); // stream
 	}
+
 }
 
 void QNode::tcpDisconnected() {
-	std_msgs::String msg;
-	msg.data = "QNode: tcp disconnected";
-	chatter_publisher.publish(msg);
-
 	std::cout << "QNode: tcp disconnected" << std::endl;
 }
 
 void QNode::renderData(const char *pData, DataHeader &dataHeader){
-	if (0 == esprosData) {
-		showDistance(pData, dataHeader);
-	} else if (1 == esprosData) {
-		showGrayscale(pData, dataHeader);
-	} else {
-		showBoth(pData, dataHeader);
-	}
+	if (showDistance) renderDistance(pData, dataHeader) ;
+	if (showDistanceColor) renderDistanceColor(pData, dataHeader) ;
+	if (showAmplitude) renderAmplitude(pData, dataHeader) ;
+	if (showInterleave) renderInterleave(pData, dataHeader) ;
 }
 
-void QNode::showDistance(const char *pData, DataHeader &dataHeader)
+void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 {
 	sensor_msgs::CameraInfo cInfo;
 	sensor_msgs::Image img;
@@ -176,15 +199,61 @@ void QNode::showDistance(const char *pData, DataHeader &dataHeader)
 		uint8_t distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
 		uint8_t distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
 
+		if (!confidenceBits) {
+			distanceMsb = distanceMsb & 0b00111111;
+		}
+
 		img.data[2*index] = distanceMsb;
 		img.data[2*index + 1] = distanceLsb;
 	}
 
-	camera_info_publisher.publish(cInfo);
+	distance_camera_info_publisher.publish(cInfo);
 	distance_image_publisher.publish(img);
 }
 
-void QNode::showGrayscale(const char *pData, DataHeader &dataHeader)
+void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
+{
+	imageColorizerDistance.setRange(0, settings->getRange());
+
+	sensor_msgs::CameraInfo cInfo;
+	sensor_msgs::Image img;
+
+	ros::Time now = ros::Time::now();
+
+	cInfo.header.stamp = now;
+	cInfo.header.frame_id = FRAME_ID;
+
+	img.header.stamp = now;
+	img.header.frame_id = FRAME_ID;
+
+	img.encoding = sensor_msgs::image_encodings::RGB8;
+	img.is_bigendian = 1; //true
+
+	img.width = dataHeader.width;
+	img.height = dataHeader.height;
+	img.step = img.width * 3;
+
+	img.data.resize(img.step * img.height);
+
+	for (int index = 0; index < (img.width * img.height); index++) {
+		uint8_t distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
+		uint8_t distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
+
+		distanceMsb = distanceMsb & 0b00111111; // scrub confidence bits
+
+		unsigned int pixelDistance = (distanceMsb << 8) + distanceLsb;
+		Color color = imageColorizerDistance.getColor(pixelDistance, ImageColorizer::RGB);
+
+		img.data[3*index] = color.r;
+		img.data[3*index + 1] = color.g;
+		img.data[3*index + 2] = color.b;
+	}
+
+	distance_color_camera_info_publisher.publish(cInfo);
+	distance_color_image_publisher.publish(img);
+}
+
+void QNode::renderAmplitude(const char *pData, DataHeader &dataHeader)
 {
 	sensor_msgs::Image img;
 
@@ -202,17 +271,22 @@ void QNode::showGrayscale(const char *pData, DataHeader &dataHeader)
 
 	for (int index = 0; index < (img.width * img.height); index++) {
 
-		uint8_t distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
-		uint8_t distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
+		uint8_t amplitudeMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
+		uint8_t amplitudeLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
 
-		img.data[2*index] = distanceMsb;
-		img.data[2*index + 1] = distanceLsb;
+		if (!confidenceBits) {
+			amplitudeMsb = amplitudeMsb & 0b00111111;
+		}
+
+		img.data[2*index] = amplitudeMsb;
+		img.data[2*index + 1] = amplitudeLsb;
 	}
 
+	//amplituce_camera_info_publisher(cInfo);
 	amplitude_image_publisher.publish(img);
 }
 
-void QNode::showBoth(const char *pData, DataHeader &dataHeader){
+void QNode::renderInterleave(const char *pData, DataHeader &dataHeader){
 	sensor_msgs::Image img;
 
 	img.header.stamp = ros::Time::now();
@@ -233,11 +307,17 @@ void QNode::showBoth(const char *pData, DataHeader &dataHeader){
 		uint8_t distanceMsb = (uint8_t) pData[4*index+1+dataHeader.offset];
 		uint8_t distanceLsb = (uint8_t) pData[4*index+0+dataHeader.offset];
 
+		if (!confidenceBits) {
+			amplitudeMsb = amplitudeMsb & 0b00001111;
+			amplitudeMsb = amplitudeMsb & 0b00111111;
+		}
+
 		img.data[4*index] = amplitudeMsb;
 		img.data[4*index + 1] = amplitudeLsb;
 		img.data[4*index + 2] = distanceMsb;
 		img.data[4*index + 3] = distanceLsb;
 	}
 
-	amplitude_distance_image_publisher.publish(img);
+	//interleave_camera_info_publisher(cInfo);
+	interleave_image_publisher.publish(img);
 }
