@@ -19,9 +19,9 @@
 #include <QStringListModel>
 #include "controller.h"
 
-#include <bitset>
 
 const std::string ESPROS32 = "ESPROS32";
+const std::string FRAME_ID = "1";
 
 /*****************************************************************************
 ** Class
@@ -58,6 +58,7 @@ private:
   ros::Publisher distance_image_publisher;
   ros::Publisher amplitude_image_publisher;
   ros::Publisher amplitude_distance_image_publisher;
+  ros::Publisher camera_info_publisher;
   Controller &controller;
   Settings *settings;
   int esprosData;

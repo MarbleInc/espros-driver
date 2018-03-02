@@ -16,6 +16,7 @@
 #include <std_msgs/String.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/CameraInfo.h>
 #include "espros_nogui/qnode.hpp"
 
 /*****************************************************************************
@@ -53,6 +54,7 @@ bool QNode::init() {
 	distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance", 100);
 	amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude", 100);
 	amplitude_distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude_distance", 100);
+	camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_camera_info", 100);
 	start();
 	return true;
 }
@@ -150,10 +152,16 @@ void QNode::renderData(const char *pData, DataHeader &dataHeader){
 
 void QNode::showDistance(const char *pData, DataHeader &dataHeader)
 {
+	sensor_msgs::CameraInfo cInfo;
 	sensor_msgs::Image img;
 
-	img.header.stamp = ros::Time::now();
-	img.header.frame_id = "1";
+	ros::Time now = ros::Time::now();
+
+	cInfo.header.stamp = now;
+	cInfo.header.frame_id = FRAME_ID;
+
+	img.header.stamp = now;
+	img.header.frame_id = FRAME_ID;
 
 	img.encoding = sensor_msgs::image_encodings::MONO16;
 	img.is_bigendian = 1; //true
@@ -172,6 +180,7 @@ void QNode::showDistance(const char *pData, DataHeader &dataHeader)
 		img.data[2*index + 1] = distanceLsb;
 	}
 
+	camera_info_publisher.publish(cInfo);
 	distance_image_publisher.publish(img);
 }
 
