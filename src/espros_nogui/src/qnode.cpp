@@ -87,6 +87,8 @@ void QNode::run() {
 
 void QNode::fetchParams() {
 	ros::NodeHandle nh("~");
+
+	// read .launch params
 	nh.param("espros_data", esprosData, -1);
 
 	nh.param("show_distance", showDistance, 1);
@@ -96,6 +98,26 @@ void QNode::fetchParams() {
 
 	nh.param("confidence_bits", confidenceBits, 1);
 
+	//process console params
+	if (-1 != esprosData) {
+		showDistance = 0;
+		showDistanceColor = 0;
+		showAmplitude = 0;
+		showInterleave = 0;
+
+		switch(esprosData) {
+			case 0: showDistance = 1;
+				break;
+			case 1: showDistanceColor = 1;
+				break;
+			case 2: showAmplitude = 1;
+				break;
+			case 3: showInterleave = 1;
+				break;
+		}
+	}
+
+	// set settings
 	int intTime0, intTime1, intTime2, intTimeGray, offset, minAmp, range;
 
 	if (nh.getParam("integration_time_0", intTime0)) {
@@ -137,25 +159,6 @@ void QNode::tcpConnected() {
 	std::cout << "QNode: tcp connected" << std::endl;
 
   controller.sendAllSettingsToCamera();
-
-	//process console/.launch params
-	if (-1 != esprosData) {
-		showDistance = 0;
-		showDistanceColor = 0;
-		showAmplitude = 0;
-		showInterleave = 0;
-
-		switch(esprosData) {
-			case 0: showDistance = 1;
-				break;
-			case 1: showDistanceColor = 1;
-				break;
-			case 2: showAmplitude = 1;
-				break;
-			case 3: showInterleave = 1;
-				break;
-		}
-	}
 
 	if ( ((showDistance || showDistanceColor) && showAmplitude) || showInterleave ) {
 		std::cout << "Requesting interleaved distance and amplitude..." << std::endl;
