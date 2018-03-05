@@ -117,6 +117,15 @@ void QNode::fetchParams() {
 		}
 	}
 
+	// determine data to request
+	if ( ((showDistance || showDistanceColor) && showAmplitude) || showInterleave ) {
+		fetchType = FETCH_INTERLEAVE;
+	} else if (showAmplitude) {
+		fetchType = FETCH_AMPLITUDE;
+	} else {
+		fetchType = FETCH_DISTANCE;
+	}
+
 	// set settings
 	int intTime0, intTime1, intTime2, intTimeGray, offset, minAmp, range;
 
@@ -160,15 +169,22 @@ void QNode::tcpConnected() {
 
   controller.sendAllSettingsToCamera();
 
-	if ( ((showDistance || showDistanceColor) && showAmplitude) || showInterleave ) {
-		std::cout << "Requesting interleaved distance and amplitude..." << std::endl;
-		controller.requestDistanceAmplitude(true); // stream
-	} else if (showAmplitude) {
-		std::cout << "Requesting amplitude..." << std::endl;
-		controller.requestGrayscale(true); // stream
-	} else {
-		std::cout << "Requesting distance..." << std::endl;
-		controller.requestDistance(true); // stream
+	switch (fetchType) {
+		case FETCH_DISTANCE:
+			std::cout << "Requesting distance..." << std::endl;
+			fetchType = FETCH_DISTANCE;
+			controller.requestDistance(true); // stream
+			break;
+		case FETCH_AMPLITUDE:
+			std::cout << "Requesting amplitude..." << std::endl;
+			fetchType = FETCH_AMPLITUDE;
+			controller.requestGrayscale(true); // stream
+			break;
+		case FETCH_INTERLEAVE:
+			std::cout << "Requesting interleaved distance and amplitude..." << std::endl;
+			fetchType = FETCH_INTERLEAVE;
+			controller.requestDistanceAmplitude(true); // stream
+			break;
 	}
 
 }
@@ -184,6 +200,18 @@ void QNode::renderData(const char *pData, DataHeader &dataHeader){
 	if (showInterleave) renderInterleave(pData, dataHeader) ;
 }
 
+void QNode::setCameraInfo(const ros::Time time, sensor_msgs::CameraInfo *cInfo) {
+	cInfo->header.stamp = time;
+	cInfo->header.frame_id = FRAME_ID;
+	cInfo->height = HEIGHT;
+	cInfo->width = WIDTH;
+	cInfo->distortion_model = DISTORTION_MODEL;
+	cInfo->D = D;
+	cInfo->K = K;
+	cInfo->R = R;
+	cInfo->P = P;
+}
+
 void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 {
 	sensor_msgs::CameraInfo cInfo;
@@ -191,15 +219,7 @@ void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 
 	ros::Time now = ros::Time::now();
 
-	cInfo.header.stamp = now;
-	cInfo.header.frame_id = FRAME_ID;
-	cInfo.height = HEIGHT;
-	cInfo.width = WIDTH;
-	cInfo.distortion_model = DISTORTION_MODEL;
-	cInfo.D = D;
-	cInfo.K = K;
-	cInfo.R = R;
-	cInfo.P = P;
+	setCameraInfo(now, &cInfo);
 
 	img.header.stamp = now;
 	img.header.frame_id = FRAME_ID;
@@ -238,15 +258,7 @@ void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
 
 	ros::Time now = ros::Time::now();
 
-	cInfo.header.stamp = now;
-	cInfo.header.frame_id = FRAME_ID;
-	cInfo.height = HEIGHT;
-	cInfo.width = WIDTH;
-	cInfo.distortion_model = DISTORTION_MODEL;
-	cInfo.D = D;
-	cInfo.K = K;
-	cInfo.R = R;
-	cInfo.P = P;
+	setCameraInfo(now, &cInfo);
 
 	img.header.stamp = now;
 	img.header.frame_id = FRAME_ID;
@@ -285,15 +297,7 @@ void QNode::renderAmplitude(const char *pData, DataHeader &dataHeader)
 
 	ros::Time now = ros::Time::now();
 
-	cInfo.header.stamp = now;
-	cInfo.header.frame_id = FRAME_ID;
-	cInfo.height = HEIGHT;
-	cInfo.width = WIDTH;
-	cInfo.distortion_model = DISTORTION_MODEL;
-	cInfo.D = D;
-	cInfo.K = K;
-	cInfo.R = R;
-	cInfo.P = P;
+	setCameraInfo(now, &cInfo);
 
 	img.header.stamp = now;
 	img.header.frame_id = FRAME_ID;
@@ -330,15 +334,7 @@ void QNode::renderInterleave(const char *pData, DataHeader &dataHeader){
 
 	ros::Time now = ros::Time::now();
 
-	cInfo.header.stamp = now;
-	cInfo.header.frame_id = FRAME_ID;
-	cInfo.height = HEIGHT;
-	cInfo.width = WIDTH;
-	cInfo.distortion_model = DISTORTION_MODEL;
-	cInfo.D = D;
-	cInfo.K = K;
-	cInfo.R = R;
-	cInfo.P = P;
+	setCameraInfo(now, &cInfo);
 
 	img.header.stamp = now;
 	img.header.frame_id = FRAME_ID;

@@ -19,6 +19,7 @@
 #include <boost/array.hpp>
 #include <QThread>
 #include <QStringListModel>
+#include <sensor_msgs/CameraInfo.h>
 #include "controller.h"
 #include "image_colorizer.h"
 
@@ -40,6 +41,13 @@ const boost::array<double, 12> P  = {241.2, 0.0, 160.0, 0.0, 0.0, 241.2, 120.0, 
 
 class QNode : public QThread {
     Q_OBJECT
+
+    enum {
+      FETCH_DISTANCE,
+      FETCH_AMPLITUDE,
+      FETCH_INTERLEAVE
+    };
+
 public:
 	QNode(int argc, char** argv, Controller &controller);
 	virtual ~QNode();
@@ -59,6 +67,7 @@ signals:
 
 private:
   void fetchParams();
+  void setCameraInfo(const ros::Time time, sensor_msgs::CameraInfo *cInfo);
   void renderDistance(const char *pData, DataHeader &dataHeader);
   void renderDistanceColor(const char *pData, DataHeader &dataHeader);
   void renderAmplitude(const char *pData, DataHeader &dataHeader);
@@ -88,6 +97,7 @@ private:
   int showDistanceColor;
   int showAmplitude;
   int showInterleave;
+  int fetchType;
 };
 
 #endif
