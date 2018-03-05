@@ -233,9 +233,16 @@ void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 
 	img.data.resize(img.step * img.height);
 
+	uint8_t distanceMsb;
+	uint8_t distanceLsb;
 	for (int index = 0; index < (img.width * img.height); index++) {
-		uint8_t distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
-		uint8_t distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
+		if (FETCH_INTERLEAVE == fetchType) {
+			distanceMsb = (uint8_t) pData[4*index+1+dataHeader.offset];
+			distanceLsb = (uint8_t) pData[4*index+0+dataHeader.offset];
+		} else {
+			distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
+			distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
+		}
 
 		if (!confidenceBits) {
 			distanceMsb = distanceMsb & 0b00111111;
@@ -272,9 +279,16 @@ void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
 
 	img.data.resize(img.step * img.height);
 
+	uint8_t distanceMsb;
+	uint8_t distanceLsb;
 	for (int index = 0; index < (img.width * img.height); index++) {
-		uint8_t distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
-		uint8_t distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
+		if (FETCH_INTERLEAVE == fetchType) {
+			distanceMsb = (uint8_t) pData[4*index+1+dataHeader.offset];
+			distanceLsb = (uint8_t) pData[4*index+0+dataHeader.offset];
+		} else {
+			distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
+			distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
+		}
 
 		distanceMsb = distanceMsb & 0b00111111; // scrub confidence bits
 
@@ -311,10 +325,16 @@ void QNode::renderAmplitude(const char *pData, DataHeader &dataHeader)
 
 	img.data.resize(img.step * img.height);
 
+	uint8_t amplitudeMsb;
+	uint8_t amplitudeLsb;
 	for (int index = 0; index < (img.width * img.height); index++) {
-
-		uint8_t amplitudeMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
-		uint8_t amplitudeLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
+		if (FETCH_INTERLEAVE == fetchType) {
+			amplitudeMsb = (uint8_t) pData[4*index+3+dataHeader.offset];
+			amplitudeLsb = (uint8_t) pData[4*index+2+dataHeader.offset];
+		} else {
+			amplitudeMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
+			amplitudeLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
+		}
 
 		if (!confidenceBits) {
 			amplitudeMsb = amplitudeMsb & 0b00111111;
@@ -356,7 +376,7 @@ void QNode::renderInterleave(const char *pData, DataHeader &dataHeader){
 
 		if (!confidenceBits) {
 			amplitudeMsb = amplitudeMsb & 0b00001111;
-			amplitudeMsb = amplitudeMsb & 0b00111111;
+			distanceMsb = distanceMsb & 0b00111111;
 		}
 
 		img.data[4*index] = amplitudeMsb;
