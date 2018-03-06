@@ -14,7 +14,6 @@
 #include <ros/network.h>
 #include <string>
 #include <std_msgs/String.h>
-#include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/CameraInfo.h>
 #include "espros_nogui/qnode.hpp"
@@ -97,6 +96,9 @@ void QNode::fetchParams() {
 	nh.param("show_interleave", showInterleave, 0);
 
 	nh.param("confidence_bits", confidenceBits, 1);
+
+	nh.param("orient_vertical", orientVertical, 0);
+	nh.param("orient_horizontal", orientHorizontal, 0);
 
 	//process console params
 	if (-1 != esprosData) {
@@ -212,44 +214,84 @@ void QNode::setCameraInfo(const ros::Time time, sensor_msgs::CameraInfo *cInfo) 
 	cInfo->P = P;
 }
 
+void QNode::setImage(const ros::Time time, const int pixelBytes, sensor_msgs::Image *img) {
+	img->header.stamp = time;
+	img->header.frame_id = FRAME_ID;
+	img->is_bigendian = 1; //true
+	img->width = WIDTH;
+	img->height = HEIGHT;
+	img->step = img->width * pixelBytes;
+	img->data.resize(img->step * img->height);
+}
+
+int QNode::getIndex(const int x, const int y, const int pixelBytes) {
+	int ox, oy; // oriented values
+
+	// flip vertical
+	if (orientVertical) {
+		oy = HEIGHT - 1 - y;
+	} else {
+		oy = y;
+	}
+
+	// flip horizontal
+	if (orientHorizontal) {
+		ox = WIDTH - 1 - x;
+	} else {
+		ox = x;
+	}
+
+	// compute array index
+	int index = ((oy * WIDTH) + ox) * pixelBytes;
+
+	return index;
+}
+
 void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 {
-	sensor_msgs::CameraInfo cInfo;
 	sensor_msgs::Image img;
+	sensor_msgs::CameraInfo cInfo;
 
 	ros::Time now = ros::Time::now();
 
-	setCameraInfo(now, &cInfo);
+	int pixelBytes = 2;
 
-	img.header.stamp = now;
-	img.header.frame_id = FRAME_ID;
+	setCameraInfo(now, &cInfo);
+	setImage(now, pixelBytes, &img);
 
 	img.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
-	img.is_bigendian = 1; //true
-
-	img.width = dataHeader.width;
-	img.height = dataHeader.height;
-	img.step = img.width * 2;
-
-	img.data.resize(img.step * img.height);
 
 	uint8_t distanceMsb;
 	uint8_t distanceLsb;
-	for (int index = 0; index < (img.width * img.height); index++) {
-		if (FETCH_INTERLEAVE == fetchType) {
-			distanceMsb = (uint8_t) pData[4*index+1+dataHeader.offset];
-			distanceLsb = (uint8_t) pData[4*index+0+dataHeader.offset];
-		} else {
-			distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
-			distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
-		}
+	int readIndex = 0;
+	int writeIndex;
+	for (int y = 0; y < HEIGHT; y++)
+	{
+		for (int x = 0; x < WIDTH; x++)
+		{
+			// read data
+			if (FETCH_INTERLEAVE == fetchType) {
+				distanceMsb = (uint8_t) pData[4*readIndex+1+dataHeader.offset];
+				distanceLsb = (uint8_t) pData[4*readIndex+0+dataHeader.offset];
+			} else {
+				distanceMsb = (uint8_t) pData[2*readIndex+1+dataHeader.offset];
+				distanceLsb = (uint8_t) pData[2*readIndex+0+dataHeader.offset];
+			}
 
-		if (!confidenceBits) {
-			distanceMsb = distanceMsb & 0b00111111;
-		}
+			// remove confidence bits
+			if (!confidenceBits) {
+				distanceMsb = distanceMsb & 0b00111111;
+			}
 
-		img.data[2*index] = distanceMsb;
-		img.data[2*index + 1] = distanceLsb;
+			// flip image
+			writeIndex = getIndex(x, y, pixelBytes);
+
+			// write pixel
+			img.data[writeIndex] = distanceMsb;
+			img.data[writeIndex + 1] = distanceLsb;
+
+			readIndex++;
+		}
 	}
 
 	distance_camera_info_publisher.publish(cInfo);
@@ -260,44 +302,48 @@ void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
 {
 	imageColorizerDistance.setRange(0, settings->getRange());
 
-	sensor_msgs::CameraInfo cInfo;
 	sensor_msgs::Image img;
+	sensor_msgs::CameraInfo cInfo;
 
 	ros::Time now = ros::Time::now();
 
-	setCameraInfo(now, &cInfo);
+	int pixelBytes = 3;
 
-	img.header.stamp = now;
-	img.header.frame_id = FRAME_ID;
+	setCameraInfo(now, &cInfo);
+	setImage(now, pixelBytes, &img);
 
 	img.encoding = sensor_msgs::image_encodings::RGB8;
-	img.is_bigendian = 1; //true
-
-	img.width = dataHeader.width;
-	img.height = dataHeader.height;
-	img.step = img.width * 3;
-
-	img.data.resize(img.step * img.height);
 
 	uint8_t distanceMsb;
 	uint8_t distanceLsb;
-	for (int index = 0; index < (img.width * img.height); index++) {
-		if (FETCH_INTERLEAVE == fetchType) {
-			distanceMsb = (uint8_t) pData[4*index+1+dataHeader.offset];
-			distanceLsb = (uint8_t) pData[4*index+0+dataHeader.offset];
-		} else {
-			distanceMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
-			distanceLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
+	int readIndex = 0;
+	int writeIndex;
+	for (int y = 0; y < HEIGHT; y++)
+	{
+		for (int x = 0; x < WIDTH; x++)
+		{
+			if (FETCH_INTERLEAVE == fetchType) {
+				distanceMsb = (uint8_t) pData[4*readIndex+1+dataHeader.offset];
+				distanceLsb = (uint8_t) pData[4*readIndex+0+dataHeader.offset];
+			} else {
+				distanceMsb = (uint8_t) pData[2*readIndex+1+dataHeader.offset];
+				distanceLsb = (uint8_t) pData[2*readIndex+0+dataHeader.offset];
+			}
+
+			distanceMsb = distanceMsb & 0b00111111; // scrub confidence bits
+
+			unsigned int pixelDistance = (distanceMsb << 8) + distanceLsb;
+			Color color = imageColorizerDistance.getColor(pixelDistance, ImageColorizer::RGB);
+
+			// flip image
+			writeIndex = getIndex(x, y, pixelBytes);
+			
+			img.data[writeIndex] = color.r;
+			img.data[writeIndex + 1] = color.g;
+			img.data[writeIndex + 2] = color.b;
+
+			readIndex++;
 		}
-
-		distanceMsb = distanceMsb & 0b00111111; // scrub confidence bits
-
-		unsigned int pixelDistance = (distanceMsb << 8) + distanceLsb;
-		Color color = imageColorizerDistance.getColor(pixelDistance, ImageColorizer::RGB);
-
-		img.data[3*index] = color.r;
-		img.data[3*index + 1] = color.g;
-		img.data[3*index + 2] = color.b;
 	}
 
 	distance_color_camera_info_publisher.publish(cInfo);
@@ -352,7 +398,7 @@ void QNode::renderInterleave(const char *pData, DataHeader &dataHeader){
 	sensor_msgs::CameraInfo cInfo;
 	sensor_msgs::Image img;
 
-	ros::Time now = ros::Time::now();
+	const ros::Time now = ros::Time::now();
 
 	setCameraInfo(now, &cInfo);
 

@@ -20,9 +20,9 @@
 #include <QThread>
 #include <QStringListModel>
 #include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/Image.h>
 #include "controller.h"
 #include "image_colorizer.h"
-
 
 const std::string ESPROS32 = "ESPROS32";
 const std::string FRAME_ID = "espros_base";
@@ -68,6 +68,9 @@ signals:
 private:
   void fetchParams();
   void setCameraInfo(const ros::Time time, sensor_msgs::CameraInfo *cInfo);
+  void setImage(const ros::Time time, const int pixelBytes, sensor_msgs::Image *img);
+  int getIndex(const int x, const int y, const int pixelBytes);
+
   void renderDistance(const char *pData, DataHeader &dataHeader);
   void renderDistanceColor(const char *pData, DataHeader &dataHeader);
   void renderAmplitude(const char *pData, DataHeader &dataHeader);
@@ -98,6 +101,8 @@ private:
   int showAmplitude;
   int showInterleave;
   int fetchType;
+  int orientVertical;
+  int orientHorizontal;
 };
 
 #endif
