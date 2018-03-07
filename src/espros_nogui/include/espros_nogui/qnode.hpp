@@ -24,16 +24,17 @@
 #include "controller.h"
 #include "image_colorizer.h"
 
+
 const std::string ESPROS32 = "ESPROS32";
 const std::string FRAME_ID = "espros_base";
 
 const int HEIGHT = 240;
 const int WIDTH = 320;
 const std::string DISTORTION_MODEL = "plumb_bob";
-const std::vector<double> D = {0.0, 0.0, 0.0, 0.0, 0.0};
-const boost::array<double, 9> K  = {241.2, 0.0, 160.0, 0.0, 241.2, 120.0, 0.0, 0.0, 1.0};
-const boost::array<double, 9> R  = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
-const boost::array<double, 12> P  = {241.2, 0.0, 160.0, 0.0, 0.0, 241.2, 120.0, 0.0, 0.0, 0.0, 1.0, 0.0};
+const std::vector<double> D = {-0.309386903830596, 0.06765995368321089, 0.005496266120711321, -0.001982504817185045, 0.0};
+const boost::array<double, 9> K = {179.3276607258264, 0.0, 164.0886984119734, 0.0, 179.7358339944852, 108.31234252056599, 0.0, 0.0, 1.0};
+const boost::array<double, 9> R = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
+const boost::array<double, 12> P = {122.7355728149414, 0.0, 161.61204232822092, 0.0, 0.0, 148.3640594482422, 105.1743229432941, 0.0, 0.0, 0.0, 1.0, 0.0};
 
 /*****************************************************************************
 ** Class

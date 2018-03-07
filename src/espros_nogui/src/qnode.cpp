@@ -75,7 +75,7 @@ bool QNode::init() {
 
 //this is really just a shut down handler
 void QNode::run() {
-	ros::Rate loop_rate(1);
+	ros::Rate loop_rate(30);
 	while ( ros::ok() ) {
 		ros::spinOnce();
 		loop_rate.sleep();
@@ -265,6 +265,7 @@ void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 	uint8_t distanceLsb;
 	int readIndex = 0;
 	int writeIndex;
+
 	for (int y = 0; y < HEIGHT; y++)
 	{
 		for (int x = 0; x < WIDTH; x++)
@@ -278,17 +279,27 @@ void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 				distanceLsb = (uint8_t) pData[2*readIndex+0+dataHeader.offset];
 			}
 
+			unsigned int pixelDistance = (distanceMsb << 8) + distanceLsb;
+
 			// remove confidence bits
 			if (!confidenceBits) {
+				if (16000 < pixelDistance) {
+					distanceMsb = 0;
+					distanceLsb = 0;
+					pixelDistance = 0;
+				}
+
 				distanceMsb = distanceMsb & 0b00111111;
 			}
+
+			float scale = (float) pixelDistance / (float) 16000;
+			unsigned int dist = (unsigned int) (scale * 1500);
 
 			// flip image
 			writeIndex = getIndex(x, y, pixelBytes);
 
-			// write pixel
-			img.data[writeIndex] = distanceMsb;
-			img.data[writeIndex + 1] = distanceLsb;
+			img.data[writeIndex] = (uint8_t) dist >> 8;
+			img.data[writeIndex + 1] = (uint8_t) dist;
 
 			readIndex++;
 		}
@@ -337,7 +348,7 @@ void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
 
 			// flip image
 			writeIndex = getIndex(x, y, pixelBytes);
-			
+
 			img.data[writeIndex] = color.r;
 			img.data[writeIndex + 1] = color.g;
 			img.data[writeIndex + 2] = color.b;
