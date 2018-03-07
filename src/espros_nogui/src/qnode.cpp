@@ -293,9 +293,6 @@ void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 				distanceMsb = distanceMsb & 0b00111111;
 			}
 
-			// mm to m
-			unsigned int dist = (unsigned int) (float) pixelDistance * 0.001;
-
 			// flip image
 			writeIndex = getIndex(x, y, 1);
 
