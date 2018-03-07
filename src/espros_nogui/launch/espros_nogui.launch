@@ -19,7 +19,7 @@
     <param name="confidence_bits" value="0" /> <!-- does not apply to distance_color -->
 
     <param name="orient_vertical" value="0" /> <!-- reverse image vertically -->
-    <param name="orient_horizontal" value="1" /> <!-- reverse image horizontally -->
+    <param name="orient_horizontal" value="0" /> <!-- reverse image horizontally -->
 
 
     <!-- 1 - 2,700 (us), 0 to disable, default = 100 -->

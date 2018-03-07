@@ -260,6 +260,7 @@ void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 	setImage(now, pixelBytes, &img);
 
 	img.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
+  uint16_t* data_16_arr = reinterpret_cast<uint16_t*>(&img.data[0]);
 
 	uint8_t distanceMsb;
 	uint8_t distanceLsb;
@@ -292,14 +293,13 @@ void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 				distanceMsb = distanceMsb & 0b00111111;
 			}
 
-			float scale = (float) pixelDistance / (float) 16000;
-			unsigned int dist = (unsigned int) (scale * 1500);
+			// mm to m
+			unsigned int dist = (unsigned int) (float) pixelDistance * 0.001;
 
 			// flip image
-			writeIndex = getIndex(x, y, pixelBytes);
+			writeIndex = getIndex(x, y, 1);
 
-			img.data[writeIndex] = (uint8_t) dist >> 8;
-			img.data[writeIndex + 1] = (uint8_t) dist;
+      data_16_arr[readIndex] = (uint16_t) pixelDistance;
 
 			readIndex++;
 		}
@@ -341,10 +341,19 @@ void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
 				distanceLsb = (uint8_t) pData[2*readIndex+0+dataHeader.offset];
 			}
 
-			distanceMsb = distanceMsb & 0b00111111; // scrub confidence bits
-
 			unsigned int pixelDistance = (distanceMsb << 8) + distanceLsb;
 			Color color = imageColorizerDistance.getColor(pixelDistance, ImageColorizer::RGB);
+
+			// remove confidence bits
+			if (!confidenceBits) {
+				if (16000 < pixelDistance) {
+					distanceMsb = 0;
+					distanceLsb = 0;
+					pixelDistance = 0;
+				}
+
+				distanceMsb = distanceMsb & 0b00111111;
+			}
 
 			// flip image
 			writeIndex = getIndex(x, y, pixelBytes);
@@ -363,6 +372,20 @@ void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
 
 void QNode::renderAmplitude(const char *pData, DataHeader &dataHeader)
 {
+	/*
+	sensor_msgs::Image img;
+	sensor_msgs::CameraInfo cInfo;
+
+	ros::Time now = ros::Time::now();
+
+	int pixelBytes = 3;
+
+	setCameraInfo(now, &cInfo);
+	setImage(now, pixelBytes, &img);
+*/
+
+
+
 	sensor_msgs::CameraInfo cInfo;
 	sensor_msgs::Image img;
 

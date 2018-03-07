@@ -24,6 +24,7 @@
 #include "controller.h"
 #include "image_colorizer.h"
 
+#include <bitset>
 
 const std::string ESPROS32 = "ESPROS32";
 const std::string FRAME_ID = "espros_base";
