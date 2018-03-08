@@ -1,30 +1,56 @@
 # espros-driver
 
-QT - ROS requirements:
+## Usage
 
-sudo apt-get install ros-kinetic-qt-create
+#### Command line
 
-sudo apt-get install ros-kinetic-qt-build
+espros_data parameter over rides the show_* parameters
 
-sudo apt-get install ros-kinetic-qt-ros
+#### Launch files
 
-sudo apt-get install ros-kinetic-qt-gui
-
-sudo apt-get install ros-kinetic-qt-gui-app
-
-sudo apt-get install ros-kinetic-qt-gui-core
-
-sudo apt-get install ros-kinetic-qt-gui-cpp
+##### espros_nogui.launch
 
 
-Usage - distance image: rosrun espros_nogui espros_nogui _espros_data:=0
+show_* parameters specify which topics to publish
 
-Usage - amplitude image: rosrun espros_nogui espros_nogui _espros_data:=1
+confidence_bits zeros any pixels flagged as bad data
 
-Defaults to distance; retains last param.
+oriend_* parameters mirror the output on the indicated axis
 
-Publishes to topics espros_distnace, espros_amplitude.  Image format MONO16.
 
-Publishes combined distance and amplitude to topic espros_amplitude_distance; image format value is 'ESPROS32'.
+##### espros_xyz.launch
 
-Device configuration exposed in espros_nogui/config.launch.  
+Publishes PointCloud2. Subscribes to espros_distance/image_raw
+
+#### Published topics
+
+##### Distance data
+
+espros_distance/image_raw
+
+espros_distance/camera_info
+
+
+##### False color distance image
+
+espros_color_distance/image_raw
+
+expros_color_distance/camera_info
+
+
+##### Grayscale data
+
+espros_amplitude/image_raw
+
+espros_amplitude/camera_info
+
+
+##### Interleaved destance and amplitude data
+
+espros_interleave/image_raw
+
+espros_interleave/camera_info
+
+##### Point cloud
+
+espros_distance/points
