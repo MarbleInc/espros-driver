@@ -46,7 +46,7 @@ class QNode : public QThread {
 
     enum {
       FETCH_DISTANCE,
-      FETCH_AMPLITUDE,
+      FETCH_GRAYSCALE,
       FETCH_INTERLEAVE
     };
 
@@ -75,7 +75,7 @@ private:
 
   void renderDistance(const char *pData, DataHeader &dataHeader);
   void renderDistanceColor(const char *pData, DataHeader &dataHeader);
-  void renderAmplitude(const char *pData, DataHeader &dataHeader);
+  void renderGrayscale(const char *pData, DataHeader &dataHeader);
   void renderInterleave(const char *pData, DataHeader &dataHeader);
 
 	int init_argc;
@@ -90,8 +90,8 @@ private:
   ros::Publisher distance_color_image_publisher;
   ros::Publisher distance_color_camera_info_publisher;
 
-  ros::Publisher amplitude_image_publisher;
-  ros::Publisher amplitude_camera_info_publisher;
+  ros::Publisher grayscale_image_publisher;
+  ros::Publisher grayscale_camera_info_publisher;
 
   ros::Publisher interleave_image_publisher;
   ros::Publisher interleave_camera_info_publisher;
@@ -100,7 +100,7 @@ private:
   int confidenceBits; // include confidence bits in output
   int showDistance;
   int showDistanceColor;
-  int showAmplitude;
+  int showGrayscale;
   int showInterleave;
   int fetchType;
   int orientVertical;
