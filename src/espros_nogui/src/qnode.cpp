@@ -296,7 +296,7 @@ void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 			// flip image
 			writeIndex = getIndex(x, y, 1);
 
-      data_16_arr[readIndex] = (uint16_t) pixelDistance;
+      data_16_arr[writeIndex] = (uint16_t) pixelDistance;
 
 			readIndex++;
 		}
@@ -369,56 +369,56 @@ void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
 
 void QNode::renderAmplitude(const char *pData, DataHeader &dataHeader)
 {
-	/*
 	sensor_msgs::Image img;
 	sensor_msgs::CameraInfo cInfo;
 
 	ros::Time now = ros::Time::now();
 
-	int pixelBytes = 3;
+	int pixelBytes = 2;
 
 	setCameraInfo(now, &cInfo);
 	setImage(now, pixelBytes, &img);
-*/
 
-
-
-	sensor_msgs::CameraInfo cInfo;
-	sensor_msgs::Image img;
-
-	ros::Time now = ros::Time::now();
-
-	setCameraInfo(now, &cInfo);
-
-	img.header.stamp = now;
-	img.header.frame_id = FRAME_ID;
-
-	img.encoding = sensor_msgs::image_encodings::MONO16;
-	img.is_bigendian = 1; //true
-
-	img.width = dataHeader.width;
-	img.height = dataHeader.height;
-	img.step = img.width * 2;
-
-	img.data.resize(img.step * img.height);
+	img.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
 
 	uint8_t amplitudeMsb;
 	uint8_t amplitudeLsb;
-	for (int index = 0; index < (img.width * img.height); index++) {
-		if (FETCH_INTERLEAVE == fetchType) {
-			amplitudeMsb = (uint8_t) pData[4*index+3+dataHeader.offset];
-			amplitudeLsb = (uint8_t) pData[4*index+2+dataHeader.offset];
-		} else {
-			amplitudeMsb = (uint8_t) pData[2*index+1+dataHeader.offset];
-			amplitudeLsb = (uint8_t) pData[2*index+0+dataHeader.offset];
-		}
+	int readIndex = 0;
+	int writeIndex;
 
-		if (!confidenceBits) {
-			amplitudeMsb = amplitudeMsb & 0b00111111;
-		}
+	for (int y = 0; y < HEIGHT; y++)
+	{
+		for (int x = 0; x < WIDTH; x++)
+		{
+			if (FETCH_INTERLEAVE == fetchType) {
+				amplitudeMsb = (uint8_t) pData[4*readIndex+3+dataHeader.offset];
+				amplitudeLsb = (uint8_t) pData[4*readIndex+2+dataHeader.offset];
+			} else {
+				amplitudeMsb = (uint8_t) pData[2*readIndex+1+dataHeader.offset];
+				amplitudeLsb = (uint8_t) pData[2*readIndex+0+dataHeader.offset];
+			}
 
-		img.data[2*index] = amplitudeMsb;
-		img.data[2*index + 1] = amplitudeLsb;
+			unsigned int pixelDistance = (amplitudeMsb << 8) + amplitudeLsb;
+
+			// remove confidence bits
+			if (!confidenceBits) {
+				if (16000 < pixelDistance) {
+					amplitudeMsb = 0;
+					amplitudeLsb = 0;
+					pixelDistance = 0;
+				}
+
+				amplitudeMsb = amplitudeMsb & 0b00111111;
+			}
+
+			// flip image
+			writeIndex = getIndex(x, y, pixelBytes);
+
+			img.data[writeIndex] = amplitudeMsb;
+			img.data[writeIndex + 1] = amplitudeLsb;
+
+			readIndex++;
+		}
 	}
 
 	amplitude_camera_info_publisher.publish(cInfo);
@@ -426,40 +426,65 @@ void QNode::renderAmplitude(const char *pData, DataHeader &dataHeader)
 }
 
 void QNode::renderInterleave(const char *pData, DataHeader &dataHeader){
-	sensor_msgs::CameraInfo cInfo;
 	sensor_msgs::Image img;
+	sensor_msgs::CameraInfo cInfo;
 
-	const ros::Time now = ros::Time::now();
+	ros::Time now = ros::Time::now();
+
+	int pixelBytes = 4;
 
 	setCameraInfo(now, &cInfo);
-
-	img.header.stamp = now;
-	img.header.frame_id = FRAME_ID;
+	setImage(now, pixelBytes, &img);
 
 	img.encoding = ESPROS32;
-	img.is_bigendian = 1; //true
 
-	img.width = dataHeader.width;
-	img.height = dataHeader.height;
-	img.step = img.width * 4;
+	int readIndex = 0;
+	int writeIndex;
 
-	img.data.resize(img.step * img.height);
+	uint8_t amplitudeMsb, amplitudeLsb, distanceMsb, distanceLsb;
+	for (int y = 0; y < HEIGHT; y++)
+	{
+		for (int x = 0; x < WIDTH; x++)
+		{
+			amplitudeMsb = (uint8_t) pData[4*readIndex+3+dataHeader.offset];
+			amplitudeLsb = (uint8_t) pData[4*readIndex+2+dataHeader.offset];
+			distanceMsb = (uint8_t) pData[4*readIndex+1+dataHeader.offset];
+			distanceLsb = (uint8_t) pData[4*readIndex+0+dataHeader.offset];
 
-	for (int index = 0; index < (img.width * img.height); index++) {
-		uint8_t amplitudeMsb = (uint8_t) pData[4*index+3+dataHeader.offset];
-		uint8_t amplitudeLsb = (uint8_t) pData[4*index+2+dataHeader.offset];
-		uint8_t distanceMsb = (uint8_t) pData[4*index+1+dataHeader.offset];
-		uint8_t distanceLsb = (uint8_t) pData[4*index+0+dataHeader.offset];
+			unsigned int pixelDistance = (distanceMsb << 8) + distanceLsb;
+			unsigned int pixelAmplitude = (amplitudeMsb << 8) + amplitudeLsb;
 
-		if (!confidenceBits) {
-			amplitudeMsb = amplitudeMsb & 0b00001111;
-			distanceMsb = distanceMsb & 0b00111111;
+			if (!confidenceBits) {
+				amplitudeMsb = amplitudeMsb & 0b00001111;
+				distanceMsb = distanceMsb & 0b00111111;
+			}
+			
+			// remove confidence bits
+			if (!confidenceBits) {
+				if (16000 < pixelDistance) {
+					distanceMsb = 0;
+					distanceLsb = 0;
+					amplitudeMsb = 0;
+					amplitudeLsb = 0;
+
+					pixelDistance = 0;
+					pixelAmplitude = 0;
+				}
+
+				amplitudeMsb = amplitudeMsb & 0b00001111;
+				distanceMsb = distanceMsb & 0b00111111;
+			}
+
+			// flip image
+			writeIndex = getIndex(x, y, pixelBytes);
+
+			img.data[writeIndex] = amplitudeMsb;
+			img.data[writeIndex + 1] = amplitudeLsb;
+			img.data[writeIndex + 2] = distanceMsb;
+			img.data[writeIndex + 3] = distanceLsb;
+
+			readIndex++;
 		}
-
-		img.data[4*index] = amplitudeMsb;
-		img.data[4*index + 1] = amplitudeLsb;
-		img.data[4*index + 2] = distanceMsb;
-		img.data[4*index + 3] = distanceLsb;
 	}
 
 	interleave_camera_info_publisher.publish(cInfo);

@@ -12,9 +12,9 @@
           -1 - default, ignores this param, allowing use below params -->
     <param name="espros_data" value="-1" />
 
-    <param name="show_distance" value="1" />
-    <param name="show_distance_color" value="1" /> <!-- Primarily for human visualization -->
-    <param name="show_amplitude" value="0" />
+    <param name="show_distance" value="0" />
+    <param name="show_distance_color" value="0" /> <!-- Primarily for human visualization -->
+    <param name="show_amplitude" value="1" />
     <param name="show_interleave" value="0" /> <!-- distance and amplitude -->
     <param name="confidence_bits" value="0" /> <!-- does not apply to distance_color -->
 
