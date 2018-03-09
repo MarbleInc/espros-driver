@@ -1,11 +1,10 @@
 #include <ros/ros.h>
 #include <ros/network.h>
 #include <string>
-#include <std_msgs/String.h>
 #include <sensor_msgs/image_encodings.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <stdlib.h>
 #include "espros_nogui/qnode.hpp"
-
 
 QNode::QNode(int argc, char** argv, Controller &controller) :
 	init_argc(argc),
@@ -33,6 +32,8 @@ bool QNode::init() {
 	fetchParams();
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
 	ros::NodeHandle n;
+
+	param_subscriber = n.subscribe<diagnostic_msgs::KeyValue>("espros_param", 100, &QNode::paramCallback, this);
 
 	if (showGrayscale) {
 		grayscale_image_publisher = n.advertise<sensor_msgs::Image>("espros_grayscale/image_raw", 100);
@@ -124,34 +125,73 @@ void QNode::fetchParams() {
 	// set settings
 	int intTime0, intTime1, intTime2, intTimeGray, offset, minAmp, range;
 
-	if (nh.getParam("integration_time_0", intTime0)) {
+	if (nh.getParam(INT_TIME_0, intTime0)) {
 		settings->setIntegrationTime0(intTime0);
 	}
 
-	if (nh.getParam("integration_time_1", intTime1)) {
+	if (nh.getParam(INT_TIME_1, intTime1)) {
 		settings->setIntegrationTime1(intTime1);
 	}
 
-	if (nh.getParam("integration_time_2", intTime2)) {
+	if (nh.getParam(INT_TIME_2, intTime2)) {
 		settings->setIntegrationTime2(intTime2);
 	}
 
-	if (nh.getParam("integration_time_grayscale", intTimeGray)) {
+	if (nh.getParam(INT_TIME_GRAY, intTimeGray)) {
 		settings->setIntegrationTimeGrayscale(intTimeGray);
 	}
 
-	if (nh.getParam("offset", offset)) {
+	if (nh.getParam(OFFSET, offset)) {
 		settings->setOffset(offset);
 	}
 
-	if (nh.getParam("min_amplitude", minAmp)) {
+	if (nh.getParam(MIN_AMP, minAmp)) {
 		settings->setMinAmplitude(minAmp);
 	}
 
-	if (nh.getParam("range", range)) {
+	if (nh.getParam(RANGE, range)) {
 		settings->setRange(range);
 	}
 
+}
+
+void QNode::paramCallback(const diagnostic_msgs::KeyValueConstPtr& msg) {
+	std::string key = msg->key;
+	std::string value = msg->value;
+
+	int num = atoi(value.c_str());
+	if (0 == num && "0" != value) {
+		num = -1;
+	}
+
+	bool valid = false;
+	if(0 <= num) {
+		valid = true;
+		if (INT_TIME_0 == key) {
+			settings->setIntegrationTime0(num);
+		} else if (INT_TIME_1 == key) {
+			settings->setIntegrationTime1(num);
+		} else if (INT_TIME_2 == key) {
+			settings->setIntegrationTime2(num);
+		} else if (INT_TIME_GRAY == key) {
+			settings->setIntegrationTimeGrayscale(num);
+		} else if (OFFSET == key) {
+			settings->setOffset(num);
+		} else if (MIN_AMP == key) {
+			settings->setMinAmplitude(num);
+		} else if (RANGE == key) {
+			settings->setRange(num);
+		} else {
+			valid = false;
+		}
+	}
+
+	if (valid) {
+		controller.sendAllSettingsToCamera();
+		std::cout << "Set parameter: " << key << "=" << value << std::endl;
+	} else {
+		std::cout << "Invalid parameter: " << key << "=" << value << std::endl;
+	}
 }
 
 void QNode::setSettings(const Settings *settings)

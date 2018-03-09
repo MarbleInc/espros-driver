@@ -1,30 +1,19 @@
 #ifndef QNODE_H
 #define QNODE_H
 
-/**
- * @file /includeespros_qt/qnode.hpp
- *
- * @brief Communications central!
- *
- * @date February 2011
- **/
-
-/*****************************************************************************
-** Includes
-*****************************************************************************/
-
 #include <ros/ros.h>
 #include <string>
 #include <vector>
 #include <boost/array.hpp>
 #include <QThread>
 #include <QStringListModel>
+#include <std_msgs/String.h>
 #include <sensor_msgs/CameraInfo.h>
 #include <sensor_msgs/Image.h>
 #include "controller.h"
 #include "image_colorizer.h"
+#include <diagnostic_msgs/KeyValue.h>
 
-#include <bitset>
 
 const std::string ESPROS32 = "ESPROS32";
 const std::string FRAME_ID = "espros_base";
@@ -36,6 +25,15 @@ const std::vector<double> D = {-0.309386903830596, 0.06765995368321089, 0.005496
 const boost::array<double, 9> K = {179.3276607258264, 0.0, 164.0886984119734, 0.0, 179.7358339944852, 108.31234252056599, 0.0, 0.0, 1.0};
 const boost::array<double, 9> R = {1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0};
 const boost::array<double, 12> P = {122.7355728149414, 0.0, 161.61204232822092, 0.0, 0.0, 148.3640594482422, 105.1743229432941, 0.0, 0.0, 0.0, 1.0, 0.0};
+
+const std::string INT_TIME_0 = "integration_time_0";
+const std::string INT_TIME_1 = "integration_time_1";
+const std::string INT_TIME_2 = "integration_time_2";
+const std::string INT_TIME_GRAY = "integration_time_grayscale";
+const std::string OFFSET = "offset";
+const std::string MIN_AMP = "min_amplitude";
+const std::string RANGE = "range";
+
 
 /*****************************************************************************
 ** Class
@@ -57,6 +55,7 @@ public:
 	bool init();
 	void run();
   void setSettings(const Settings *settings);
+  void paramCallback(const diagnostic_msgs::KeyValueConstPtr& msg);
 
 
   private slots:
@@ -85,6 +84,8 @@ private:
   Controller &controller;
   Settings *settings;
   ImageColorizer imageColorizerDistance;
+
+  ros::Subscriber param_subscriber;
 
   ros::Publisher distance_image_publisher;
   ros::Publisher distance_camera_info_publisher;
