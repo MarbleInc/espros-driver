@@ -33,7 +33,9 @@ const std::string INT_TIME_GRAY = "integration_time_grayscale";
 const std::string OFFSET = "offset";
 const std::string MIN_AMP = "min_amplitude";
 const std::string RANGE = "range";
-
+const std::string CONFIDENCE = "confidence_bits";
+const std::string ORIENT_VERTICAL = "orient_vertical";
+const std::string ORIENT_HORIZONTAL = "orient_horizontal";
 
 /*****************************************************************************
 ** Class

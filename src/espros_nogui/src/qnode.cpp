@@ -181,6 +181,12 @@ void QNode::paramCallback(const diagnostic_msgs::KeyValueConstPtr& msg) {
 			settings->setMinAmplitude(num);
 		} else if (RANGE == key) {
 			settings->setRange(num);
+		} else if (CONFIDENCE == key) {
+			confidenceBits = num;
+		} else if (ORIENT_VERTICAL == key) {
+			orientVertical = num;
+		} else if (ORIENT_HORIZONTAL == key) {
+			orientHorizontal = num;
 		} else {
 			valid = false;
 		}
