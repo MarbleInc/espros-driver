@@ -29,7 +29,7 @@ Publishes PointCloud2. Subscribes to espros_distance/image_raw
 
 espros_param
 
-Published topics cannot be enabled/disabled via this method; they can only be configured at driver launch.
+Published topics cannot be enabled/disabled via this method; they can only be specified at driver launch.  Output validation and orientation can be configured via this method.
 
 To publish from the command line: rostopic pub --once espros_param diagnostic_msgs/KeyValue   '{"key" : "-parameter name-", "value" : "-integer-"}'
 
