@@ -18,7 +18,6 @@ class Interface: public QObject
     ~Interface();
     void requestDistanceAmplitude(const bool doStream, const QByteArray &userData = nullptr);
     void requestDistance(const bool doStream, const QByteArray &userData = nullptr);
-    void requestAmplitude(const bool doStream, const QByteArray &userData = nullptr);
     void requestGrayscale(const bool doStream, const QByteArray &userData = nullptr);
     void setIntegrationTimes(const uint16_t integrationTime3d[3], const uint16_t integrationTimeGrayscale, const QByteArray &userData = nullptr);
     void setOffset(const int16_t offset, const QByteArray &userData = nullptr);

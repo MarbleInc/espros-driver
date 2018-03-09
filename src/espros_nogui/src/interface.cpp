@@ -161,23 +161,6 @@ void Interface::requestDistance(const bool doStream, const QByteArray &userData)
   sendCommand(outputData, userData);
 }
 
-void Interface::requestAmplitude(const bool doStream, const QByteArray &userData)
-{
-  qDebug() << "Interface::requestAmplitude()...";
-  QByteArray outputData;
-
-  uint16_t command = TOFCAM_COMMAND_GET_AMPLITUDE;
-  uint8_t stream = boolToUint8(doStream);
-
-  //Insert the 16Bit command
-  insertValue(outputData, command);
-
-  //Insert the stream flag
-  outputData.insert(2, stream);
-
-  sendCommand(outputData, userData);
-}
-
 void Interface::requestGrayscale(const bool doStream, const QByteArray &userData)
 {
   QByteArray outputData;

@@ -47,8 +47,7 @@ class QNode : public QThread {
     enum {
       FETCH_DISTANCE,
       FETCH_GRAYSCALE,
-      FETCH_INTERLEAVE,
-      FETCH_AMPLITUDE // unsopported by device
+      FETCH_INTERLEAVE
     };
 
 public:

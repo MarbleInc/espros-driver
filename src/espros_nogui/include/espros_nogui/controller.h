@@ -15,7 +15,6 @@ public:
     Controller(Settings &settings, Interface &interface);
     void sendAllSettingsToCamera();
     void requestDistance(const bool isStream);
-    void requestAmplitude(const bool isStream);
     void requestGrayscale(const bool isStream);
     void requestDistanceAmplitude(const bool isStream);
     void stopStream();

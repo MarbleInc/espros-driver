@@ -226,11 +226,6 @@ void QNode::tcpConnected() {
 			fetchType = FETCH_INTERLEAVE;
 			controller.requestDistanceAmplitude(true); // stream
 			break;
-		case FETCH_AMPLITUDE:
-			std::cout << "Requesting amplitude..." << std::endl;
-			fetchType = FETCH_AMPLITUDE;
-			controller.requestAmplitude(true); // stream
-			break;
 	}
 
 }
@@ -519,7 +514,7 @@ void QNode::renderInterleave(const ros::Time* now, const char *pData, DataHeader
 
 			data_16_arr[writeIndex] = (uint16_t) pixelAmplitude;
 			data_16_arr[writeIndex + 1] = (uint16_t) pixelDistance;
-			
+
 			readIndex++;
 		}
 	}
