@@ -47,7 +47,8 @@ class QNode : public QThread {
     enum {
       FETCH_DISTANCE,
       FETCH_GRAYSCALE,
-      FETCH_INTERLEAVE
+      FETCH_INTERLEAVE,
+      FETCH_AMPLITUDE // unsopported by device
     };
 
 public:
@@ -73,10 +74,11 @@ private:
   void setImage(const ros::Time time, const int pixelBytes, sensor_msgs::Image *img);
   int getIndex(const int x, const int y, const int pixelBytes);
 
-  void renderDistance(const char *pData, DataHeader &dataHeader);
-  void renderDistanceColor(const char *pData, DataHeader &dataHeader);
-  void renderGrayscale(const char *pData, DataHeader &dataHeader);
-  void renderInterleave(const char *pData, DataHeader &dataHeader);
+  void renderDistance(const ros::Time* now, const char *pData, DataHeader &dataHeader);
+  void renderDistanceColor(const ros::Time* now, const char *pData, DataHeader &dataHeader);
+  void renderGrayscale(const ros::Time* now, const char *pData, DataHeader &dataHeader);
+  void renderInterleave(const ros::Time* now, const char *pData, DataHeader &dataHeader);
+  void renderAmplitude(const ros::Time* now, const char *pData, DataHeader &dataHeader);
 
 	int init_argc;
 	char** init_argv;
@@ -96,12 +98,16 @@ private:
   ros::Publisher interleave_image_publisher;
   ros::Publisher interleave_camera_info_publisher;
 
+  ros::Publisher amplitude_image_publisher;
+  ros::Publisher amplitude_camera_info_publisher;
+
   int esprosData; // indicates single topic via console (rosrun)
   int confidenceBits; // include confidence bits in output
   int showDistance;
   int showDistanceColor;
   int showGrayscale;
   int showInterleave;
+  int showAmplitude;
   int fetchType;
   int orientVertical;
   int orientHorizontal;

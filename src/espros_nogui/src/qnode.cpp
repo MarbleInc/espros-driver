@@ -34,24 +34,29 @@ bool QNode::init() {
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
 	ros::NodeHandle n;
 
-	if (showDistance) {
-		distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance/image_raw", 100);
-		distance_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance/camera_info", 100);
-	}
-
-	if (showDistanceColor) {
-		distance_color_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance_color/image_raw", 100);
-		distance_color_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance_color/camera_info", 100);
-	}
-
 	if (showGrayscale) {
 		grayscale_image_publisher = n.advertise<sensor_msgs::Image>("espros_grayscale/image_raw", 100);
 		grayscale_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_grayscale/camera_info", 100);
-	}
+	} else {
+		if (showDistance) {
+			distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance/image_raw", 100);
+			distance_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance/camera_info", 100);
+		}
 
-	if (showInterleave) {
-		interleave_image_publisher = n.advertise<sensor_msgs::Image>("espros_interleave/image_raw", 100);
-		interleave_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_interleave/camera_info", 100);
+		if (showDistanceColor) {
+			distance_color_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance_color/image_raw", 100);
+			distance_color_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance_color/camera_info", 100);
+		}
+
+		if (showInterleave) {
+			interleave_image_publisher = n.advertise<sensor_msgs::Image>("espros_interleave/image_raw", 100);
+			interleave_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_interleave/camera_info", 100);
+		}
+
+		if (showAmplitude) {
+			amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude/image_raw", 100);
+			amplitude_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_amplitude/camera_info", 100);
+		}
 	}
 
 	start();
@@ -79,6 +84,7 @@ void QNode::fetchParams() {
 	nh.param("show_distance_color", showDistanceColor, 0);
 	nh.param("show_grayscale", showGrayscale, 0);
 	nh.param("show_interleave", showInterleave, 0);
+	nh.param("show_amplitude", showAmplitude, 0);
 
 	nh.param("confidence_bits", confidenceBits, 1);
 
@@ -91,6 +97,7 @@ void QNode::fetchParams() {
 		showDistanceColor = 0;
 		showGrayscale = 0;
 		showInterleave = 0;
+		showAmplitude = 0;
 
 		switch(esprosData) {
 			case 0: showDistance = 1;
@@ -101,13 +108,15 @@ void QNode::fetchParams() {
 				break;
 			case 3: showInterleave = 1;
 				break;
+			case 4: showAmplitude = 1;
+				break;
 		}
 	}
 
-	if (showInterleave) {
-		fetchType = FETCH_INTERLEAVE;
-	} else if (showGrayscale) {
+	if (showGrayscale) {
 		fetchType = FETCH_GRAYSCALE;
+	} else if (showInterleave || showAmplitude) {
+		fetchType = FETCH_INTERLEAVE;
 	} else {
 		fetchType = FETCH_DISTANCE;
 	}
@@ -171,6 +180,11 @@ void QNode::tcpConnected() {
 			fetchType = FETCH_INTERLEAVE;
 			controller.requestDistanceAmplitude(true); // stream
 			break;
+		case FETCH_AMPLITUDE:
+			std::cout << "Requesting amplitude..." << std::endl;
+			fetchType = FETCH_AMPLITUDE;
+			controller.requestAmplitude(true); // stream
+			break;
 	}
 
 }
@@ -180,10 +194,16 @@ void QNode::tcpDisconnected() {
 }
 
 void QNode::renderData(const char *pData, DataHeader &dataHeader){
-	if (showDistance) renderDistance(pData, dataHeader) ;
-	if (showDistanceColor) renderDistanceColor(pData, dataHeader) ;
-	if (showGrayscale) renderGrayscale(pData, dataHeader) ;
-	if (showInterleave) renderInterleave(pData, dataHeader) ;
+	const ros::Time now = ros::Time::now();
+
+	if (showGrayscale) {
+		renderGrayscale(&now, pData, dataHeader);
+	} else {
+		if (showDistance) renderDistance(&now, pData, dataHeader);
+		if (showDistanceColor) renderDistanceColor(&now, pData, dataHeader);
+		if (showInterleave) renderInterleave(&now, pData, dataHeader);
+		if (showAmplitude) renderAmplitude(&now, pData, dataHeader);
+	}
 }
 
 void QNode::setCameraInfo(const ros::Time time, sensor_msgs::CameraInfo *cInfo) {
@@ -231,17 +251,15 @@ int QNode::getIndex(const int x, const int y, const int pixelBytes) {
 	return index;
 }
 
-void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
+void QNode::renderDistance(const ros::Time* now, const char *pData, DataHeader &dataHeader)
 {
 	sensor_msgs::Image img;
 	sensor_msgs::CameraInfo cInfo;
 
-	ros::Time now = ros::Time::now();
-
 	int pixelBytes = 2;
 
-	setCameraInfo(now, &cInfo);
-	setImage(now, pixelBytes, &img);
+	setCameraInfo(*now, &cInfo);
+	setImage(*now, pixelBytes, &img);
 
 	img.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
   uint16_t* data_16_arr = reinterpret_cast<uint16_t*>(&img.data[0]);
@@ -290,19 +308,17 @@ void QNode::renderDistance(const char *pData, DataHeader &dataHeader)
 	distance_image_publisher.publish(img);
 }
 
-void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
+void QNode::renderDistanceColor(const ros::Time* now, const char *pData, DataHeader &dataHeader)
 {
 	imageColorizerDistance.setRange(0, settings->getRange());
 
 	sensor_msgs::Image img;
 	sensor_msgs::CameraInfo cInfo;
 
-	ros::Time now = ros::Time::now();
-
 	int pixelBytes = 3;
 
-	setCameraInfo(now, &cInfo);
-	setImage(now, pixelBytes, &img);
+	setCameraInfo(*now, &cInfo);
+	setImage(*now, pixelBytes, &img);
 
 	img.encoding = sensor_msgs::image_encodings::RGB8;
 
@@ -351,17 +367,15 @@ void QNode::renderDistanceColor(const char *pData, DataHeader &dataHeader)
 	distance_color_image_publisher.publish(img);
 }
 
-void QNode::renderGrayscale(const char *pData, DataHeader &dataHeader)
+void QNode::renderGrayscale(const ros::Time* now, const char *pData, DataHeader &dataHeader)
 {
 	sensor_msgs::Image img;
 	sensor_msgs::CameraInfo cInfo;
 
-	ros::Time now = ros::Time::now();
-
 	int pixelBytes = 2;
 
-	setCameraInfo(now, &cInfo);
-	setImage(now, pixelBytes, &img);
+	setCameraInfo(*now, &cInfo);
+	setImage(*now, pixelBytes, &img);
 
 	img.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
 	uint16_t* data_16_arr = reinterpret_cast<uint16_t*>(&img.data[0]);
@@ -405,16 +419,14 @@ void QNode::renderGrayscale(const char *pData, DataHeader &dataHeader)
 	grayscale_image_publisher.publish(img);
 }
 
-void QNode::renderInterleave(const char *pData, DataHeader &dataHeader){
+void QNode::renderInterleave(const ros::Time* now, const char *pData, DataHeader &dataHeader){
 	sensor_msgs::Image img;
 	sensor_msgs::CameraInfo cInfo;
 
-	ros::Time now = ros::Time::now();
-
 	int pixelBytes = 4;
 
-	setCameraInfo(now, &cInfo);
-	setImage(now, pixelBytes, &img);
+	setCameraInfo(*now, &cInfo);
+	setImage(*now, pixelBytes, &img);
 
 	img.encoding = ESPROS32;
 
@@ -469,4 +481,61 @@ void QNode::renderInterleave(const char *pData, DataHeader &dataHeader){
 
 	interleave_camera_info_publisher.publish(cInfo);
 	interleave_image_publisher.publish(img);
+}
+
+void QNode::renderAmplitude(const ros::Time* now, const char *pData, DataHeader &dataHeader)
+{
+	sensor_msgs::Image img;
+	sensor_msgs::CameraInfo cInfo;
+
+	int pixelBytes = 2;
+
+	setCameraInfo(*now, &cInfo);
+	setImage(*now, pixelBytes, &img);
+
+	img.encoding = sensor_msgs::image_encodings::TYPE_16UC1;
+  uint16_t* data_16_arr = reinterpret_cast<uint16_t*>(&img.data[0]);
+
+	uint8_t amplitudeMsb;
+	uint8_t amplitudeLsb;
+	int readIndex = 0;
+	int writeIndex;
+
+	for (int y = 0; y < HEIGHT; y++)
+	{
+		for (int x = 0; x < WIDTH; x++)
+		{
+			// read data
+			if (FETCH_INTERLEAVE == fetchType) {
+				amplitudeMsb = (uint8_t) pData[4*readIndex+1+dataHeader.offset];
+				amplitudeLsb = (uint8_t) pData[4*readIndex+0+dataHeader.offset];
+			} else {
+				amplitudeMsb = (uint8_t) pData[2*readIndex+1+dataHeader.offset];
+				amplitudeLsb = (uint8_t) pData[2*readIndex+0+dataHeader.offset];
+			}
+
+			unsigned int pixelAmplitude = (amplitudeMsb << 8) + amplitudeLsb;
+
+			// remove confidence bits
+			if (!confidenceBits) {
+				if (16000 < pixelAmplitude) {
+					amplitudeMsb = 0;
+					amplitudeLsb = 0;
+					pixelAmplitude = 0;
+				}
+
+				amplitudeMsb = amplitudeMsb & 0b00111111;
+			}
+
+			// flip image
+			writeIndex = getIndex(x, y, 1);
+
+      data_16_arr[writeIndex] = (uint16_t) pixelAmplitude;
+
+			readIndex++;
+		}
+	}
+
+	amplitude_camera_info_publisher.publish(cInfo);
+	amplitude_image_publisher.publish(img);
 }

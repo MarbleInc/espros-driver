@@ -72,6 +72,13 @@ void Controller::requestDistance(const bool isStream)
   interface.requestDistance(isStream, userData);
 }
 
+//Wrapper function to request the amplitude from the interface
+void Controller::requestAmplitude(const bool isStream)
+{
+  QByteArray userData = settings.getUserData();
+  interface.requestAmplitude(isStream, userData);
+}
+
 //Wrapper function to request grayscale from the interface
 void Controller::requestGrayscale(const bool isStream)
 {

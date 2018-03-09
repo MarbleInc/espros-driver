@@ -12,6 +12,7 @@ typedef enum
   TOFCAM_COMMAND_SET_INT_TIMES = 1,
   TOFCAM_COMMAND_GET_DISTANCE_AMPLITUDE = 2,
   TOFCAM_COMMAND_GET_DISTANCE = 3,
+  TOFCAM_COMMAND_GET_AMPLITUDE = 4,
   TOFCAM_COMMAND_GET_GRAYSCALE = 5,
   TOFCAM_COMMAND_STOP_STREAM = 6,
   TOFCAM_COMMAND_SET_OFFSET = 20,
@@ -149,6 +150,23 @@ void Interface::requestDistance(const bool doStream, const QByteArray &userData)
   QByteArray outputData;
 
   uint16_t command = TOFCAM_COMMAND_GET_DISTANCE;
+  uint8_t stream = boolToUint8(doStream);
+
+  //Insert the 16Bit command
+  insertValue(outputData, command);
+
+  //Insert the stream flag
+  outputData.insert(2, stream);
+
+  sendCommand(outputData, userData);
+}
+
+void Interface::requestAmplitude(const bool doStream, const QByteArray &userData)
+{
+  qDebug() << "Interface::requestAmplitude()...";
+  QByteArray outputData;
+
+  uint16_t command = TOFCAM_COMMAND_GET_AMPLITUDE;
   uint8_t stream = boolToUint8(doStream);
 
   //Insert the 16Bit command
