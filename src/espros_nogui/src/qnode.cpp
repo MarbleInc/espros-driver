@@ -475,6 +475,7 @@ void QNode::renderInterleave(const ros::Time* now, const char *pData, DataHeader
 	setImage(*now, pixelBytes, &img);
 
 	img.encoding = ESPROS32;
+	uint16_t* data_16_arr = reinterpret_cast<uint16_t*>(&img.data[0]);
 
 	int readIndex = 0;
 	int writeIndex;
@@ -514,13 +515,11 @@ void QNode::renderInterleave(const ros::Time* now, const char *pData, DataHeader
 			}
 
 			// flip image
-			writeIndex = getIndex(x, y, pixelBytes);
+			writeIndex = getIndex(x, y, 1);
 
-			img.data[writeIndex] = amplitudeMsb;
-			img.data[writeIndex + 1] = amplitudeLsb;
-			img.data[writeIndex + 2] = distanceMsb;
-			img.data[writeIndex + 3] = distanceLsb;
-
+			data_16_arr[writeIndex] = (uint16_t) pixelAmplitude;
+			data_16_arr[writeIndex + 1] = (uint16_t) pixelDistance;
+			
 			readIndex++;
 		}
 	}
