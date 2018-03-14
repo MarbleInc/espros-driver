@@ -33,30 +33,30 @@ bool QNode::init() {
 	ros::start(); // explicitly needed since our nodehandle is going out of scope.
 	ros::NodeHandle n;
 
-	param_subscriber = n.subscribe<diagnostic_msgs::KeyValue>("espros_param", 100, &QNode::paramCallback, this);
+	param_subscriber = n.subscribe<diagnostic_msgs::KeyValue>("espros/param", 100, &QNode::paramCallback, this);
 
 	if (showGrayscale) {
-		grayscale_image_publisher = n.advertise<sensor_msgs::Image>("espros_grayscale/image_raw", 100);
-		grayscale_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_grayscale/camera_info", 100);
+		grayscale_image_publisher = n.advertise<sensor_msgs::Image>("espros/grayscale/image_raw", 100);
+		grayscale_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros/grayscale/camera_info", 100);
 	} else {
 		if (showDistance) {
-			distance_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance/image_raw", 100);
-			distance_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance/camera_info", 100);
+			distance_image_publisher = n.advertise<sensor_msgs::Image>("espros/distance/image_raw", 100);
+			distance_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros/distance/camera_info", 100);
 		}
 
 		if (showDistanceColor) {
-			distance_color_image_publisher = n.advertise<sensor_msgs::Image>("espros_distance_color/image_raw", 100);
-			distance_color_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_distance_color/camera_info", 100);
+			distance_color_image_publisher = n.advertise<sensor_msgs::Image>("espros/distance_color/image_raw", 100);
+			distance_color_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros/distance_color/camera_info", 100);
 		}
 
 		if (showInterleave) {
-			interleave_image_publisher = n.advertise<sensor_msgs::Image>("espros_interleave/image_raw", 100);
-			interleave_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_interleave/camera_info", 100);
+			interleave_image_publisher = n.advertise<sensor_msgs::Image>("espros/interleave/image_raw", 100);
+			interleave_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros/interleave/camera_info", 100);
 		}
 
 		if (showAmplitude) {
-			amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros_amplitude/image_raw", 100);
-			amplitude_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros_amplitude/camera_info", 100);
+			amplitude_image_publisher = n.advertise<sensor_msgs::Image>("espros/amplitude/image_raw", 100);
+			amplitude_camera_info_publisher = n.advertise<sensor_msgs::CameraInfo>("espros/amplitude/camera_info", 100);
 		}
 	}
 

@@ -4,8 +4,8 @@
 
   <node pkg="nodelet" type="nodelet" name="espros_xyz"
           args="load depth_image_proc/point_cloud_xyz espros_xyz_manager --no-bond" output="screen">
-    <remap from="image_rect" to="espros_distance/image_raw"/>
-    <remap from="points"     to="espros_distance/points"/>
+    <remap from="image_rect" to="espros/distance/image_raw"/>
+    <remap from="points"     to="espros/distance/points"/>
   </node>
 
 </launch>
