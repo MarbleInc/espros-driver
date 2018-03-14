@@ -20,14 +20,14 @@ orient_* parameters mirror the output on the indicated axis
 
 ##### espros_xyz.launch
 
-Publishes PointCloud2. Subscribes to espros_distance/image_raw
+Publishes PointCloud2 to espros/distance/points. Subscribes to espros/distance/image_raw
 
 
 ## Subscribed topics
 
 ### Configuration
 
-espros_param
+espros/param
 
 Published topics cannot be enabled/disabled via this method; they can only be specified at driver launch.  Output validation and orientation can be configured via this method.
 
@@ -38,39 +38,39 @@ To publish from the command line: rostopic pub --once espros_param diagnostic_ms
 
 ### Distance data
 
-espros_distance/image_raw
+espros/distance/image_raw
 
-espros_distance/camera_info
+espros/distance/camera_info
 
 
 ### False color distance image
 
-espros_color_distance/image_raw
+espros/color_distance/image_raw
 
-expros_color_distance/camera_info
+expros/color_distance/camera_info
 
 
 ### Grayscale data
 
-espros_grayscale/image_raw
+espros/grayscale/image_raw
 
-espros_grayscale/camera_info
+espros/grayscale/camera_info
 
 
 ### Interleaved destance and amplitude data
 
-espros_interleave/image_raw
+espros/interleave/image_raw
 
-espros_interleave/camera_info
+espros/interleave/camera_info
 
 
 ### Amplitude data
 
-espros_amplitude/image_raw
+espros/amplitude/image_raw
 
-espros_amplitude/camera_info
+espros/amplitude/camera_info
 
 
 ### Point cloud
 
-espros_distance/points
+espros/distance/points
