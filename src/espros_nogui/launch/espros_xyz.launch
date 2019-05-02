@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node pkg="nodelet" type="nodelet" name="espros_xyz_manager" args="manager" output="screen" />
+
+  <node pkg="nodelet" type="nodelet" name="espros_xyz"
+          args="load depth_image_proc/point_cloud_xyz espros_xyz_manager --no-bond" output="screen">
+    <remap from="image_rect" to="espros/distance/image_raw"/>
+    <remap from="points"     to="espros/distance/points"/>
+  </node>
+
+</launch>
